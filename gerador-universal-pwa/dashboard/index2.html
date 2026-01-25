@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#121212"> 
+    <title>UTMIFY</title>
+    
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="logo2.png">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+
+    <style>
+        /* CSS GERAL */
+        .-icon { display: flex; align-items: center; justify-content: center; }
+        .-img { width: 152px; height: auto; transform: scale(0.7); }
+
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --input-border: #ffffff;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --text-muted: #52525b;
+            --primary-blue: #2e69ff;
+            --danger-red: #2fe311; 
+            --nav-bg: #121212;
+            --radius-lg: 12px;
+            --radius-md: 8px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-color); color: var(--text-primary); font-family: 'Inter', sans-serif; padding-bottom: 80px; /* Ajustado para a altura da imagem */ overscroll-behavior-y: none; }
+
+        /* HEADER */
+        header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background-color: var(--bg-color); position: sticky; top: 0; z-index: 90; }
+        .-area { display: flex; align-items: center; gap: 8px; }
+        .header-title { position: absolute; left: 50%; transform: translateX(-50%); color: var(--text-secondary); font-size: 0.95rem; }
+        .header-icons { display: flex; gap: 20px; font-size: 1.1rem; }
+
+        /* CONTAINER */
+        .container { padding: 0 16px; max-width: 600px; margin: 0 auto; }
+
+        /* CARDS */
+        .card { background-color: var(--card-bg); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 16px; }
+        .section-title { font-size: 1.3rem; font-weight: 500; margin-bottom: 24px; }
+        .update-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid #27272a; padding-bottom: 20px; }
+        .update-text { color: var(--text-secondary); font-size: 0.9rem; }
+        .btn-update { background-color: var(--primary-blue); color: white; border: none; padding: 10px 24px; border-radius: 6px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: opacity 0.3s; }
+        .btn-update:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        /* FILTROS */
+        .filters-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .filter-group { display: flex; flex-direction: column; gap: 8px; }
+        .filter-group.full-width { grid-column: span 2; }
+        .label-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 2px; }
+        .info-icon { font-size: 0.8rem; color: var(--text-muted); }
+        .custom-select { background-color: transparent; border: 1px solid var(--input-border); border-radius: var(--radius-md); color: white; padding: 12px; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+
+        /* METRIC CARDS */
+        .metric-card { background-color: var(--card-bg); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 12px; position: relative; }
+        .metric-header { display: flex; justify-content: space-between; align-items: center; color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 8px; }
+        .metric-value { font-size: 1.5rem; font-weight: 600; color: white; outline: none; border-bottom: 1px solid transparent; transition: border-color 0.3s; }
+        .metric-value:focus { border-bottom: 1px solid var(--primary-blue); }
+        .metric-sub { font-size: 0.75rem; margin-top: 4px; }
+        .text-red { color: var(--danger-red) !important; }
+
+        /* GRÁFICO */
+        .chart-container { position: relative; display: flex; justify-content: center; align-items: center; height: 220px; flex-direction: column; margin-top: 10px; margin-bottom: 10px;}
+        .donut-chart { position: relative; width: 180px; height: 180px; border-radius: 50%; background: conic-gradient(#27272a 0% 100%); display: flex; justify-content: center; align-items: center; transition: background 0.5s ease; }
+        .chart-center { width: 130px; height: 130px; background-color: var(--card-bg); border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 2; }
+        .chart-label { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 4px; }
+        .chart-value { font-size: 1.5rem; font-weight: 600; color: white; }
+        
+        /* Porcentagens Brancas */
+        .pct-label { position: absolute; font-size: 0.85rem; font-weight: 500; color: #ffffff !important; text-align: center; width: 100%; }
+        .pct-top { top: -25px; } 
+        .pct-bottom { bottom: -25px; }
+
+        .chart-legend { display: flex; justify-content: space-around; width: 100%; margin-top: 25px; }
+        .legend-item { display: flex; flex-direction: column; align-items: center; font-size: 0.8rem; color: var(--text-secondary); gap: 5px; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; }
+        .dot-blue { background-color: #3b82f6; }
+        .dot-sky { background-color: #0ea5e9; }
+        .dot-yellow { background-color: #eab308; }
+        .dot-pink { background-color: #ec4899; }
+
+        /* APROVAÇÃO */
+        .approval-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .radio-display { width: 20px; height: 20px; border: 2px solid #52525b; border-radius: 50%; display: inline-block; margin-right: 8px; }
+        .approval-value { display: flex; align-items: center; color: var(--text-secondary); font-size: 0.9rem; }
+        .approval-value span[contenteditable] { color: white; margin-left: 5px; outline: none; }
+
+        /* FAB */
+        .fab { position: fixed; bottom: 95px; /* Subiu um pouco por causa da imagem */ right: 20px; width: 50px; height: 50px; background-color: var(--primary-blue); border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 95; cursor: pointer; }
+        .fab i { color: white; font-size: 1.2rem; }
+        
+        /* NAVBAR COMO IMAGEM */
+        .bottom-nav-container { 
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            width: 100%; 
+            background-color: var(--nav-bg); /* Cor de fundo base */
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            /* Removemos padding e bordas para a imagem preencher tudo */
+            padding: 0;
+            border: none;
+        }
+
+        .nav-image-replacement {
+            width: 100%;
+            height: auto;
+            display: block; /* Remove espaços extras abaixo da imagem */
+            max-height: 80px; /* Altura máxima para não ficar gigante em telas grandes */
+            object-fit: cover; /* Garante que a imagem preencha o espaço */
+        }
+
+        /* Classes .nav-item removidas pois não são mais usadas */
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="-area">
+           <div class="-icon">
+            <img src="logo.png" alt="" class="-img">
+        </div>
+            <span class="-text"></span>
+        </div>
+        <div class="header-title">Principal</div>
+        <div class="header-icons">
+            <i class="fa-regular fa-pen-to-square"></i>
+            <i class="fa-solid fa-moon"></i>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="card">
+            <h2 class="section-title">Resumo</h2>
+            <div class="update-row">
+                <span class="update-text">Atualizado agora mesmo</span>
+                <button class="btn-update" onclick="animarAtualizacao(this)">Atualizar</button>
+            </div>
+            <div class="filters-grid">
+                <div class="filter-group"><div class="label-row"><span>Período de visualização</span><i class="fa-solid fa-circle-info info-icon"></i></div><div class="custom-select"><span>Hoje</span><i class="fa-solid fa-chevron-down"></i></div></div>
+                <div class="filter-group"><div class="label-row"><span>Conta de anúncio</span></div><div class="custom-select"><span>Todas</span><i class="fa-solid fa-chevron-down"></i></div></div>
+                <div class="filter-group"><div class="label-row"><span>Plataformas</span></div><div class="custom-select"><span>Qualquer</span><i class="fa-solid fa-chevron-down"></i></div></div>
+                <div class="filter-group"><div class="label-row"><span>Produto</span></div><div class="custom-select"><span>Qualquer</span><i class="fa-solid fa-chevron-down"></i></div></div>
+                <div class="filter-group full-width"><div class="label-row"><span>Fonte de Tráfego</span></div><div class="custom-select"><span>Qualquer</span><i class="fa-solid fa-chevron-down"></i></div></div>
+            </div>
+        </section>
+
+       <div class="metric-card">
+            <div class="metric-header">
+                <span>Faturamento Líquido</span>
+                <i class="fa-solid fa-circle-info info-icon"></i>
+            </div>
+            <div id="m-faturamento" class="metric-value" contenteditable="true" spellcheck="false">R$ 8.432,00</div>
+        </div>
+
+       <div class="metric-card">
+            <div class="metric-header">
+                <span>Gastos com anúncios</span>
+                <i class="fa-solid fa-circle-info info-icon"></i>
+            </div>
+            <div id="m-gastos" class="metric-value" contenteditable="true" spellcheck="false">R$ 1.500,00</div>
+        </div>
+
+       <div class="metric-card">
+            <div class="metric-header text-red">
+                <span>ROAS</span>
+                <i class="fa-solid fa-circle-info info-icon"></i>
+            </div>
+            <div id="m-roas" class="metric-value text-red" contenteditable="true" spellcheck="false">2.7</div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-header text-red">
+                <span>Lucro</span>
+                <i class="fa-solid fa-circle-info info-icon"></i>
+            </div>
+            <div id="m-lucro" class="metric-value text-red" contenteditable="true" spellcheck="false">R$ 6.932,00</div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-header">
+                <span>Vendas por Pagamento</span>
+            </div>
+            <div class="chart-container">
+                <div id="pct-top" class="pct-label pct-top">4.00%</div>
+                <div id="donutchart" class="donut-chart">
+                    <div class="chart-center">
+                        <span class="chart-label">Total</span>
+                        <span id="m-total-grafico" class="chart-value" contenteditable="true" spellcheck="false">25</span>
+                    </div>
+                </div>
+                <div id="pct-bottom" class="pct-label pct-bottom">96.00%</div>
+            </div>
+            <div class="chart-legend">
+                <div class="legend-item"><div class="dot dot-blue"></div>Pix</div>
+                <div class="legend-item"><div class="dot dot-sky"></div>Cartão</div>
+                <div class="legend-item"><div class="dot dot-yellow"></div>Boleto</div>
+                <div class="legend-item"><div class="dot dot-pink"></div>Outros</div>
+            </div>
+        </div>
+        
+        <div class="metric-card">
+            <div class="metric-header"><span>Vendas Pendentes</span></div>
+            <div id="m-pendentes" class="metric-value" contenteditable="true" spellcheck="false">R$ 0,00</div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-header text-red"><span>ROI</span><i class="fa-solid fa-circle-info info-icon"></i></div>
+            <div id="m-roi" class="metric-value text-red" contenteditable="true" spellcheck="false">2.7</div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-header"><span>Taxa de Aprovação</span><i class="fa-solid fa-circle-info info-icon"></i></div>
+            <div style="margin-top: 20px;">
+                <div class="approval-row"><span>Cartão</span><div class="approval-value"><span class="radio-display"></span> <span id="m-aprov-cartao" contenteditable="true" spellcheck="false">N/A</span></div></div>
+                <div class="approval-row"><span>Pix</span><div class="approval-value"><span class="radio-display"></span> <span id="m-aprov-pix" contenteditable="true" spellcheck="false">N/A</span></div></div>
+                <div class="approval-row"><span>Boleto</span><div class="approval-value"><span class="radio-display"></span> <span id="m-aprov-boleto" contenteditable="true" spellcheck="false">N/A</span></div></div>
+            </div>
+        </div>
+    </main>
+
+    <div class="bottom-nav-container">
+        <img src="navbar_print.jpg" alt="Navegação" class="nav-image-replacement">
+    </div>
+
+    <script>
+        // --- LOGICA DE GRAFICO, SALVAR E ATUALIZAR (MANTIDA ORIGINAL) ---
+        function atualizarGrafico(pix, cartao, boleto, outros) {
+            const total = pix + cartao + boleto + outros;
+            if (total === 0) {
+                document.getElementById('donutchart').style.background = `conic-gradient(#27272a 0% 100%)`;
+                return;
+            }
+            const pPix = (pix / total) * 100;
+            const pCartao = (cartao / total) * 100;
+            const pBoleto = (boleto / total) * 100;
+            const endPix = pPix;
+            const endCartao = endPix + pCartao;
+            const endBoleto = endCartao + pBoleto;
+            document.getElementById('donutchart').style.background = `conic-gradient(#0066ff 0% ${endPix}%, #0ea5e9 ${endPix}% ${endCartao}%, #eab308 ${endCartao}% ${endBoleto}%, #ec4899 ${endBoleto}% 100%)`;
+            document.getElementById('pct-bottom').innerText = pix > 0 ? pPix.toFixed(2) + "%" : "";
+            document.getElementById('pct-top').innerText = cartao > 0 ? pCartao.toFixed(2) + "%" : "";
+        }
+
+        function salvarDados() {
+            document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+                if(el.id) localStorage.setItem(el.id, el.innerText);
+            });
+        }
+
+        function carregarDados() {
+            document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+                if(el.id) {
+                    const salvo = localStorage.getItem(el.id);
+                    if(salvo) el.innerText = salvo;
+                }
+            });
+        }
+
+        document.addEventListener('input', (e) => {
+            if (e.target.getAttribute('contenteditable') === 'true') salvarDados();
+        });
+
+        window.addEventListener('load', () => {
+            carregarDados();
+            atualizarGrafico(24, 1, 0, 0); 
+        });
+
+        function animarAtualizacao(btn) {
+            btn.disabled = true;
+            const originalText = 'Atualizar';
+            let dots = 0;
+            const dotInterval = setInterval(() => {
+                dots = (dots + 1) % 4;
+                btn.innerText = 'Atualizar' + '.'.repeat(dots);
+            }, 300);
+
+            const metrics = document.querySelectorAll('.metric-value');
+            const storedValues = [];
+            metrics.forEach(el => {
+                storedValues.push({ element: el, value: el.innerText });
+                if(el.innerText !== "N/A") el.innerText = el.innerText.includes("R$") ? "R$ 0,00" : "0";
+            });
+
+            setTimeout(() => {
+                metrics.forEach((el, index) => el.innerText = storedValues[index].value);
+                clearInterval(dotInterval);
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

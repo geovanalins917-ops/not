@@ -1,0 +1,9 @@
+/pwa-notificacoes-fake
+├── index.html                 → Painel de configuração (como na imagem)
+├── manifest.json              → Define nome, ícone, modo standalone
+├── sw.js                      → Service Worker (dispara notificações)
+├── script.js                  → Lógica de configuração e controle
+├── style.css                  → Estilo verde como na imagem
+└── /dashboard
+    ├── index.html             → Seu dashboard fake (prova social)
+    └── script.js              → Atualiza valores dinâmicos

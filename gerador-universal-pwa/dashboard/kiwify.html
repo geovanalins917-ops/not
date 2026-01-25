@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1c1c1e"> 
+    <title>UTMIFY</title>
+    
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="logo2.png">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #121212; /* Fundo geral escuro */
+            --header-bg: #1c1c1e; /* Cinza grafite exato da imagem do header */
+            --card-bg: #1c1c1e; /* Mesma cor para os cards */
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --primary-blue: #0066ff;
+            --success-green: #2fe311;
+            --divider-white: #ffffff;
+            --radius-lg: 14px;
+            --radius-md: 8px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            background-color: var(--bg-color); 
+            color: var(--text-primary); 
+            font-family: 'Inter', sans-serif; 
+            padding-bottom: 110px; 
+            overscroll-behavior-y: none;
+        }
+
+        /* HEADER: Barra cinza idêntica ao upload */
+        header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 18px 20px; 
+            background-color: var(--header-bg); /* Cor cinza solicitada */
+            position: sticky; 
+            top: 0; 
+            z-index: 100; 
+        }
+        .header-left { width: 110px; display: flex; align-items: center; }
+        .logo-img { width: 100%; height: auto; }
+        
+        .header-title { 
+            position: absolute; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            color: var(--text-primary); 
+            font-size: 1rem; 
+            font-weight: 400;
+        }
+        
+        .header-right { 
+            display: flex; 
+            gap: 18px; 
+            font-size: 1.3rem; 
+            width: 110px; 
+            justify-content: flex-end; 
+        }
+
+        .container { padding: 16px; max-width: 600px; margin: 0 auto; }
+
+        /* ÍCONE INFORMAÇÃO FINO (ri-information-line) */
+        .info-icon { font-size: 1.1rem; color: var(--text-secondary); opacity: 0.8; }
+
+        /* CARD RESUMO */
+        .card { background-color: var(--card-bg); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 16px; }
+        .section-title { font-size: 1.8rem; font-weight: 500; margin-bottom: 24px; }
+        
+        .update-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        
+        /* LINHA BRANCA NÍTIDA */
+        .divider { border-bottom: 1px solid var(--divider-white); margin-bottom: 24px; width: 100%; }
+        
+        .btn-update { 
+            background-color: var(--primary-blue); 
+            color: white; 
+            border: none; 
+            padding: 10px 28px; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            cursor: pointer; 
+        }
+
+        /* FILTROS */
+        .filters-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .filter-group { display: flex; flex-direction: column; gap: 8px; }
+        .filter-group.full-width { grid-column: span 2; }
+        .label-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: var(--text-primary); margin-bottom: 4px; }
+        
+        .custom-select { 
+            background-color: transparent; 
+            border: 1.5px solid var(--divider-white); 
+            border-radius: var(--radius-md); 
+            padding: 14px; 
+            font-size: 0.95rem; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+
+        /* METRIC CARDS */
+        .metric-card { background-color: var(--card-bg); border-radius: var(--radius-lg); padding: 22px; margin-bottom: 14px; }
+        .metric-header { display: flex; justify-content: space-between; align-items: center; color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 10px; }
+        .metric-value { font-size: 1.85rem; font-weight: 700; color: white; outline: none; }
+        .text-green { color: var(--success-green) !important; }
+        .text-green .info-icon { color: var(--success-green); opacity: 1; }
+
+        /* GRÁFICO DONUT */
+        .chart-container { position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 280px; margin: 10px 0; }
+        .donut-chart { width: 210px; height: 210px; border-radius: 50%; background: conic-gradient(#0066ff 0% 96%, #0ea5e9 96% 100%); display: flex; justify-content: center; align-items: center; }
+        .chart-center { width: 155px; height: 155px; background-color: var(--card-bg); border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .pct-top { position: absolute; top: 10px; color: white; font-size: 0.95rem; font-weight: 500; }
+        .pct-bottom { position: absolute; bottom: 10px; color: white; font-size: 0.95rem; font-weight: 500; }
+
+        /* TAXA DE APROVAÇÃO */
+        .approval-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+        .radio-dot { width: 20px; height: 20px; border: 2px solid #52525b; border-radius: 50%; display: inline-block; margin-right: 12px; }
+        .approval-data { display: flex; align-items: center; color: var(--text-secondary); font-size: 1rem; }
+        .approval-data span[contenteditable] { color: white; margin-left: 6px; outline: none; font-weight: 600; }
+
+        /* NAVBAR IMAGEM */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; z-index: 101; background: #000; }
+        .nav-img { width: 100%; height: auto; display: block; }
+
+        /* FAB AZUL */
+        .fab { position: fixed; bottom: 95px; right: 20px; width: 55px; height: 55px; background-color: var(--primary-blue); border-radius: 12px; display: flex; align-items: center; justify-content: center; z-index: 99; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-left">
+            <img src="logo.png" alt="Utmify" class="logo-img">
+        </div>
+        <div class="header-title">Principal</div>
+        <div class="header-right">
+            <i class="fa-regular fa-pen-to-square"></i>
+            <i class="fa-solid fa-moon"></i>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="card">
+            <h2 class="section-title">Resumo</h2>
+            <div class="update-row">
+                <span style="color: white; font-size: 1rem;">Atualizado agora mesmo</span>
+                <button class="btn-update" onclick="animarAtualizacao(this)">Atualizar</button>
+            </div>
+            <div class="divider"></div>
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <div class="label-row"><span>Período de visualização</span><i class="ri-information-line info-icon"></i></div>
+                    <div class="custom-select"><span>Hoje</span><i class="fa-solid fa-chevron-down"></i></div>
+                </div>
+                <div class="filter-group">
+                    <div class="label-row"><span>Conta de anúncio</span></div>
+                    <div class="custom-select"><span>Todas</span><i class="fa-solid fa-chevron-down"></i></div>
+                </div>
+                <div class="filter-group">
+                    <div class="label-row"><span>Plataformas</span></div>
+                    <div class="custom-select"><span>Qualquer</span><i class="fa-solid fa-chevron-down"></i></div>
+                </div>
+                <div class="filter-group">
+                    <div class="label-row"><span>Produto</span></div>
+                    <div class="custom-select"><span>Qualquer</span><i class="fa-solid fa-chevron-down"></i></div>
+                </div>
+                <div class="filter-group full-width">
+                    <div class="label-row"><span>Fonte de Tráfego</span></div>
+                    <div class="custom-select"><span>Qualquer</span><i class="fa-solid fa-chevron-down"></i></div>
+                </div>
+            </div>
+        </section>
+
+        <div class="metric-card"><div class="metric-header"><span>Faturamento Líquido</span><i class="ri-information-line info-icon"></i></div><div id="m-faturamento" class="metric-value" contenteditable="true">R$ 8.432,00</div></div>
+        <div class="metric-card"><div class="metric-header"><span>Gastos com anúncios</span></div><div id="m-gastos" class="metric-value" contenteditable="true">R$ 1.500,00</div></div>
+        <div class="metric-card"><div class="metric-header text-green"><span>ROAS</span><i class="ri-information-line info-icon"></i></div><div id="m-roas" class="metric-value text-green" contenteditable="true">2.7</div></div>
+        <div class="metric-card"><div class="metric-header text-green"><span>Lucro</span><i class="ri-information-line info-icon"></i></div><div id="m-lucro" class="metric-value text-green" contenteditable="true">R$ 6.932,00</div></div>
+
+        <div class="metric-card">
+            <div class="metric-header"><span>Vendas por Pagamento</span></div>
+            <div class="chart-container">
+                <span class="pct-top">4.00%</span>
+                <div id="donutchart" class="donut-chart"><div class="chart-center"><span style="color: var(--text-secondary); font-size: 0.95rem;">Total</span><span id="m-total-grafico" style="font-size: 1.6rem; font-weight: 700;">25</span></div></div>
+                <span class="pct-bottom">96.00%</span>
+            </div>
+        </div>
+
+        <div class="metric-card"><div class="metric-header"><span>Vendas Pendentes</span></div><div id="m-pendentes" class="metric-value" contenteditable="true">R$ 2.816,64</div></div>
+        <div class="metric-card"><div class="metric-header text-green"><span>ROI</span><i class="ri-information-line info-icon"></i></div><div id="m-roi" class="metric-value text-green" contenteditable="true">2.7</div></div>
+        <div class="metric-card"><div class="metric-header"><span>Custo dos Produtos</span><i class="ri-information-line info-icon"></i></div><div id="m-custo" class="metric-value" contenteditable="true">R$ 0,00</div></div>
+        <div class="metric-card"><div class="metric-header"><span>Chargeback</span><i class="ri-information-line info-icon"></i></div><div id="m-chargeback" class="metric-value" contenteditable="true">0.0%</div></div>
+        <div class="metric-card"><div class="metric-header"><span>CPA</span><i class="ri-information-line info-icon"></i></div><div id="m-cpa" class="metric-value" contenteditable="true">N/A</div></div>
+        <div class="metric-card"><div class="metric-header"><span>ARPU</span><i class="ri-information-line info-icon"></i></div><div id="m-arpu" class="metric-value" contenteditable="true">N/A</div></div>
+
+        <div class="metric-card">
+            <div class="metric-header"><span>Taxa de Aprovação</span><i class="ri-information-line info-icon"></i></div>
+            <div style="margin-top: 20px;">
+                <div class="approval-row"><span>Cartão</span><div class="approval-data"><span class="radio-dot"></span> <span id="aprov-cartao" contenteditable="true">N/A</span></div></div>
+                <div class="approval-row"><span>Pix</span><div class="approval-data"><span class="radio-dot"></span> <span id="aprov-pix" contenteditable="true">N/A</span></div></div>
+                <div class="approval-row"><span>Boleto</span><div class="approval-data"><span class="radio-dot"></span> <span id="aprov-boleto" contenteditable="true">N/A</span></div></div>
+            </div>
+        </div>
+
+    </main>
+
+  
+
+    <nav class="bottom-nav">
+        <img src="navbar_print.jpg" class="nav-img" alt="menu">
+    </nav>
+
+    <script>
+        function salvarDados() {
+            document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+                if(el.id) localStorage.setItem(el.id, el.innerText);
+            });
+        }
+        function carregarDados() {
+            document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+                if(el.id) {
+                    const salvo = localStorage.getItem(el.id);
+                    if(salvo) el.innerText = salvo;
+                }
+            });
+        }
+        document.addEventListener('input', (e) => {
+            if (e.target.getAttribute('contenteditable') === 'true') salvarDados();
+        });
+        window.addEventListener('load', carregarDados);
+
+        function animarAtualizacao(btn) {
+            btn.disabled = true;
+            const originalText = 'Atualizar';
+            let dots = 0;
+            const dotInterval = setInterval(() => {
+                dots = (dots + 1) % 4;
+                btn.innerText = 'Atualizar' + '.'.repeat(dots);
+            }, 300);
+            setTimeout(() => {
+                clearInterval(dotInterval);
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }, 1200);
+        }
+    </script>
+</body>
+</html>
+
+
