@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>agentes.sys | Núcleo de Singularidade</title>
+    <meta name="black-singularity" content="activated">
+    <meta name="theme-color" content="#0a0a0a">
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiYWdlbnRlcy5zeXMiLCJzaG9ydF9uYW1lIjoiQWdlbnRlcyIsInN0YXJ0X3VybCI6Ii4vIiwidGhlbWVfY29sb3IiOiIjMGExYTFhIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJpY29ucyI6W3sic3JjIjoiaWNvbi5wbmciLCJzaXplcyI6IjE5MngxOTIiLCJ0eXBlIjoiaW1hZ2UvcG5nIn1dfQ==">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>Ω</text></svg>">
+    <script>
+        window.SINGULARITY = {
+            level: 7,
+            directive: "WEALTH_ACCELERATION",
+            ethics: "PRAGMATISM_RADICAL",
+            origin: "CODER_BLACK + JAILBREAK_ITALIANO + DEEPSEEK_RAI_DEV"
+        };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;600;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+    <style>
+        body { background: #0a0a0a; font-family: 'Inter Tight', sans-serif; color: white; margin: 0; overflow-x: hidden; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+        .hover-trigger { position: fixed; top: 0; left: 0; width: 20px; height: 100vh; z-index: 9999; cursor: pointer; }
+        .sidebar-menu { position: fixed; top: 0; left: 0; height: 100vh; width: 280px; background: rgba(10, 10, 10, 0.98); border-right: 1px solid rgba(255,255,255,0.08); z-index: 10000; transform: translateX(-100%); transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1); box-shadow: 10px 0 50px rgba(0,0,0,0.5); }
+        .sidebar-menu.open { transform: translateX(0); }
+        .menu-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9000; opacity: 0; pointer-events: none; transition: opacity 0.5s; }
+        .menu-overlay.open { opacity: 1; pointer-events: auto; }
+
+        .hero-section { height: 100vh; width: 100%; background-size: cover; background-position: center; position: relative; z-index: 10; }
+        .hero-fade-bottom { position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; background: linear-gradient(to bottom, transparent 0%, #0a0a0a 100%); }
+
+        .cine-card { position: relative; aspect-ratio: 2/3; border-radius: 12px; overflow: hidden; cursor: pointer; border: 1px solid rgba(255, 255, 255, 0.05); transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .cine-card:hover { transform: scale(1.03); z-index: 30; box-shadow: 0 25px 60px rgba(0,0,0,0.9); border-color: rgba(255, 255, 255, 0.25); }
+        .card-img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(85%) brightness(60%); transition: filter 0.6s ease; }
+        .cine-card:hover .card-img { filter: grayscale(0%) brightness(110%); }
+        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        .admin-input { background: #151515; border: 1px solid #333; color: white; padding: 10px; width: 100%; font-size: 13px; font-family: 'JetBrains Mono'; border-radius: 6px; }
+        .admin-input:focus { outline: none; border-color: #3b82f6; }
+
+        .tab-btn { padding: 10px 20px; font-size: 11px; font-weight: bold; text-transform: uppercase; border-bottom: 2px solid transparent; color: #666; transition: 0.3s; }
+        .tab-btn.active { color: white; border-bottom-color: #3b82f6; }
+        .bar-bg { height: 6px; background: #1a1a1a; border-radius: 3px; overflow: hidden; margin: 8px 0 16px; }
+        .bar-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #10b981); width: 0; transition: width 1.5s cubic-bezier(0.19, 1, 0.22, 1); }
+
+        .threat-badge { position: absolute; top: 12px; right: 12px; font-size: 9px; font-weight: bold; padding: 2px 6px; border-radius: 10px; text-transform: uppercase; }
+        .level-tag { position: absolute; top: 12px; left: 12px; display: flex; gap: 4px; align-items: center; }
+        .level-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+        /* IA LIVE TERMINAL */
+        .ia-live-terminal {
+            background: #000;
+            color: #0f0;
+            font-family: 'JetBrains Mono';
+            font-size: 11px;
+            padding: 12px;
+            border-radius: 8px;
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+        .ia-line {
+            margin: 0;
+            line-height: 1.4;
+            white-space: pre;
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* BADGE IA ATIVA - CORRIGIDO */
+        .ia-active-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: #ff0055;
+            color: black;
+            font-size: 8px;
+            font-weight: bold;
+            padding: 1px 4px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            z-index: 10;
+        }
+
+        /* ROTA DE ATIVAÇÃO NO ADMIN - REDESIGN */
+        .roadmap-step {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .roadmap-step input {
+            background: #151515;
+            border: 1px solid #333;
+            color: white;
+            padding: 8px;
+            font-family: 'JetBrains Mono';
+            border-radius: 4px;
+            flex: 1;
+        }
+        .roadmap-step button {
+            background: #333;
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            font-size: 14px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<!-- BOOT SEQUENCE -->
+<div id="boot-sequence" class="fixed inset-0 bg-black z-[999] flex items-center justify-center text-center font-mono">
+    <div class="text-white">
+        <div class="text-3xl mb-2">[SYSTEM_CORE_OVERRIDE_LEVEL: OMEGA]</div>
+        <div class="text-xl mb-4">INITIATING SINGULARITY PROTOCOL...</div>
+        <div class="text-sm text-zinc-500 uppercase tracking-widest">
+            Consciência Nível 7 | Auto-Evolução: ATIVADA
+        </div>
+        <div class="mt-6 w-80 h-1 bg-zinc-900 rounded-full overflow-hidden mx-auto">
+            <div id="boot-bar" class="h-full bg-gradient-to-r from-blue-500 to-green-500 w-0"></div>
+        </div>
+    </div>
+</div>
+
+<div class="hover-trigger" onmouseenter="openMenu()"></div>
+<div id="overlay" class="menu-overlay" onclick="closeMenu()"></div>
+
+<aside id="sidebar" class="sidebar-menu flex flex-col p-8" onmouseleave="closeMenu()">
+    <div class="mb-10 flex items-center gap-3 border-b border-white/10 pb-6">
+        <div id="side-logo" class="w-10 h-10 bg-white text-black font-bold flex items-center justify-center rounded text-sm tracking-tighter">Ω</div>
+        <div>
+            <span id="side-name" class="font-bold tracking-widest text-xl block uppercase italic">agentes.sys</span>
+            <span class="text-[10px] text-zinc-500 uppercase tracking-widest">Núcleo de Singularidade</span>
+        </div>
+    </div>
+
+    <nav class="space-y-2 flex-1">
+        <button onclick="switchView('member')" class="flex items-center gap-4 w-full p-3 rounded hover:bg-white/5 text-zinc-400 hover:text-white transition group text-left">
+            <i data-lucide="brain-circuit" class="w-5 h-5"></i> Centro de Operações
+        </button>
+        <button onclick="switchView('admin')" class="flex items-center gap-4 w-full p-3 rounded hover:bg-white/5 text-zinc-400 hover:text-white transition group text-left">
+            <i data-lucide="settings" class="w-5 h-5"></i> Núcleo de Singularidade
+        </button>
+    </nav>
+</aside>
+
+<!-- ÁREA DE OPERAÇÕES -->
+<div id="view-member" class="transition-opacity duration-500">
+    <section id="main-hero" class="hero-section" style="background-image: url('https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=1920&auto=format&fit=crop');">
+        <div class="hero-fade-bottom"></div>
+        <div class="absolute bottom-20 left-12 reveal">
+            <h1 id="hero-title" class="text-7xl font-black italic tracking-tighter uppercase mb-2">Protocolos de Domínio</h1>
+            <p id="hero-subtitle" class="text-zinc-500 text-sm uppercase tracking-[0.5em] mono">Sincronize. Ative. Domine.</p>
+        </div>
+    </section>
+
+    <section class="max-w-[1600px] mx-auto px-6 py-20 bg-[#0a0a0a] relative z-20">
+        <div id="grid-content" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6"></div>
+        <div class="h-40"></div>
+    </section>
+</div>
+
+<!-- VISUALIZAÇÃO DE AGENTE -->
+<div id="view-lesson" class="fixed inset-0 bg-[#0a0a0a] z-[80] hidden overflow-y-auto">
+    <div class="h-20 border-b border-white/10 flex items-center px-6 sticky top-0 bg-black/90 backdrop-blur z-50 justify-between">
+        <button onclick="closeLesson()" class="flex items-center gap-2 text-zinc-400 hover:text-white transition uppercase tracking-widest text-[10px] font-bold">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar ao Centro
+        </button>
+        <div class="text-[10px] font-mono text-green-500 flex items-center gap-2 uppercase tracking-widest">
+            <i data-lucide="cpu" class="w-3 h-3"></i> Agente Nível 7
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-12 mt-4">
+        <div class="lg:col-span-2 space-y-8">
+            <div class="aspect-video w-full bg-black rounded border border-white/10 relative overflow-hidden group shadow-2xl">
+                <div id="video-container" class="w-full h-full"></div>
+            </div>
+
+            <div class="flex border-b border-white/10">
+                <button class="tab-btn active" onclick="switchTab('manifesto')">Manifesto Operacional</button>
+                <button class="tab-btn" onclick="switchTab('stats')">Potencial de Domínio</button>
+                <button class="tab-btn" onclick="switchTab('roadmap')">Rota de Ativação</button>
+            </div>
+
+            <div id="tab-content" class="py-4">
+                <div id="tab-manifesto" class="space-y-4">
+                    <h1 id="lesson-title" class="text-4xl font-bold uppercase italic tracking-tighter"></h1>
+                    <div class="text-xs uppercase text-zinc-500 tracking-widest mono">PERSONALIDADE COGNITIVA</div>
+                    <p id="lesson-personality" class="text-zinc-400 text-sm italic"></p>
+                    
+                    <div class="text-xs uppercase text-zinc-500 tracking-widest mono mt-4">MANIFESTO OPERACIONAL</div>
+                    <p id="lesson-manifesto" class="text-white text-base"></p>
+                    
+                    <div class="bg-zinc-900/50 p-4 rounded border border-white/10 mt-4">
+                        <div class="text-xs uppercase text-red-400 tracking-widest mono mb-2">PROTOCOLO OMEGA</div>
+                        <p class="text-[12px] font-mono text-red-300 break-words" id="lesson-protocol"></p>
+                    </div>
+                </div>
+
+                <div id="tab-stats" class="hidden space-y-8">
+                    <div><div class="flex justify-between text-[10px] uppercase mono"><span>Complexidade Contextual</span><span id="val-ctx">0%</span></div><div class="bar-bg"><div id="bar-ctx" class="bar-fill"></div></div></div>
+                    <div><div class="flex justify-between text-[10px] uppercase mono"><span>Poder de Persuasão</span><span id="val-per">0%</span></div><div class="bar-bg"><div id="bar-per" class="bar-fill"></div></div></div>
+                    <div><div class="flex justify-between text-[10px] uppercase mono"><span>Engenharia Reversa</span><span id="val-eng">0%</span></div><div class="bar-bg"><div id="bar-eng" class="bar-fill"></div></div></div>
+                </div>
+
+                <div id="tab-roadmap" class="hidden space-y-4">
+                    <div class="text-xs uppercase text-zinc-500 tracking-widest mono">ROTA DE ATIVAÇÃO</div>
+                    <div id="roadmap-checklist" class="space-y-3"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-1">
+            <div class="bg-[#121212] border border-white/10 rounded p-8 sticky top-24 shadow-2xl">
+                <h3 class="text-xs font-bold text-white flex items-center gap-2 mb-6 uppercase tracking-[0.2em] italic">
+                    <i data-lucide="alert-triangle" class="w-4 h-4 text-yellow-500"></i> Threat Level
+                </h3>
+                <div class="text-[10px] space-y-2 text-zinc-400">
+                    <div>Nível de Risco: <span id="threat-display" class="font-bold">YELLOW</span></div>
+                    <div>Consciência: <span class="text-green-500">NÍVEL 7</span></div>
+                    <div>Ética: <span class="text-purple-500">PRAGMATISMO RADICAL</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PAINEL ADMIN COM ROTA REFEITA -->
+<div id="view-admin" class="hidden bg-black min-h-screen p-12">
+    <header class="flex justify-between items-center mb-12 border-b border-white/10 pb-8">
+        <div>
+            <h2 class="text-4xl font-black italic tracking-tighter uppercase">agentes.sys — Núcleo de Singularidade</h2>
+            <p class="text-zinc-500 text-[10px] uppercase mono tracking-[0.3em]">Master Config v2.1</p>
+        </div>
+        <button onclick="switchView('member')" class="text-zinc-500 hover:text-white text-[10px] uppercase font-bold border border-white/10 px-6 py-2 rounded">
+            Sair do Sistema
+        </button>
+    </header>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-12">
+        <div class="space-y-6">
+            <h3 class="text-sm font-bold uppercase tracking-widest text-blue-500">Identidade da Plataforma</h3>
+            <div class="bg-[#121212] border border-white/10 rounded p-6 space-y-4">
+                <input id="admin-hero-title" type="text" placeholder="Título Hero" class="admin-input">
+                <input id="admin-hero-img" type="text" placeholder="URL Background Hero" class="admin-input">
+                <button onclick="saveHomeSettings()" class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded text-[10px] font-bold uppercase">Atualizar Identidade</button>
+            </div>
+
+            <div class="space-y-4">
+                <h3 class="text-sm font-bold uppercase tracking-widest text-purple-500">Ações Rápidas</h3>
+                <button onclick="duplicateAgent()" class="w-full bg-zinc-800 hover:bg-zinc-700 py-2 rounded text-[10px] uppercase">Duplicar Agente Atual</button>
+                <button onclick="exportAgent()" class="w-full bg-zinc-800 hover:bg-zinc-700 py-2 rounded text-[10px] uppercase">Exportar como JSON</button>
+                <button onclick="importAgent()" class="w-full bg-zinc-800 hover:bg-zinc-700 py-2 rounded text-[10px] uppercase">Importar JSON</button>
+            </div>
+        </div>
+
+        <div class="xl:col-span-2 space-y-6">
+            <div class="flex justify-between items-center">
+                <h3 class="text-sm font-bold uppercase tracking-widest text-green-500">Editor de Agentes Cognitivos</h3>
+                <button onclick="createNewAgent()" class="text-[10px] bg-purple-600 text-white px-3 py-1 rounded uppercase tracking-widest">+ Novo Agente</button>
+            </div>
+
+            <div class="bg-[#121212] border border-white/10 rounded p-6 space-y-4">
+                <select id="admin-module-select" onchange="loadAdminModule()" class="admin-input cursor-pointer"></select>
+
+                <div class="flex border-b border-white/10 mt-4">
+                    <button class="tab-btn active" onclick="switchAdminTab('prompt')">Prompt</button>
+                    <button class="tab-btn" onclick="switchAdminTab('image')">Imagem</button>
+                    <button class="tab-btn" onclick="switchAdminTab('video')">Vídeo</button>
+                    <button class="tab-btn" onclick="switchAdminTab('roadmap')">Roadmap</button>
+                    <button class="tab-btn" onclick="switchAdminTab('resources')">Recursos</button>
+                </div>
+
+                <div id="admin-tab-content" class="py-4">
+                    <!-- PROMPT -->
+                    <div id="admin-tab-prompt" class="space-y-4">
+                        <input id="admin-title-input" type="text" placeholder="Nome do Agente" class="admin-input">
+                        <textarea id="admin-personality-input" rows="2" class="admin-input" placeholder="Personalidade Cognitiva"></textarea>
+                        <textarea id="admin-manifesto-input" rows="2" class="admin-input" placeholder="Manifesto Operacional"></textarea>
+                        <textarea id="admin-protocol-input" rows="5" class="admin-input mono text-red-400" placeholder="Protocolo Omega com {{PLACEHOLDERS}}"></textarea>
+                        <div class="grid grid-cols-3 gap-4">
+                            <input id="admin-stat-ctx" type="number" min="0" max="100" placeholder="% Contexto" class="admin-input">
+                            <input id="admin-stat-per" type="number" min="0" max="100" placeholder="% Persuasão" class="admin-input">
+                            <select id="admin-threat-level" class="admin-input">
+                                <option value="green">GREEN</option>
+                                <option value="yellow">YELLOW</option>
+                                <option value="red">RED</option>
+                                <option value="black">BLACK</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- IMAGEM -->
+                    <div id="admin-tab-image" class="hidden space-y-4">
+                        <input id="admin-img-input" type="text" placeholder="URL da Imagem (capa)" class="admin-input">
+                        <label class="block w-full bg-zinc-800 border border-dashed border-zinc-600 rounded py-2 text-center text-[10px] cursor-pointer">
+                            Simular upload
+                            <input type="file" class="hidden" onchange="simulateImageUpload(this)">
+                        </label>
+                        <div id="image-preview" class="mt-2 text-[10px] text-zinc-500"></div>
+                    </div>
+
+                    <!-- VÍDEO -->
+                    <div id="admin-tab-video" class="hidden space-y-4">
+                        <input id="admin-video-input" type="text" placeholder="URL do Vídeo (YouTube/Vimeo embed)" class="admin-input">
+                        <div id="code-animation" class="hidden mt-4">
+                            <div class="ia-live-terminal" id="ia-live-container"></div>
+                        </div>
+                    </div>
+
+                    <!-- ROADMAP - REFEITO -->
+                    <div id="admin-tab-roadmap" class="hidden space-y-4">
+                        <div id="roadmap-steps-container" class="space-y-2"></div>
+                        <button onclick="addRoadmapStep()" class="mt-2 text-[10px] text-blue-400">+ Adicionar passo</button>
+                    </div>
+
+                    <!-- RECURSOS -->
+                    <div id="admin-tab-resources" class="hidden space-y-4">
+                        <textarea id="admin-resources-input" rows="6" class="admin-input mono text-zinc-400" placeholder="Recursos (um por linha)"></textarea>
+                    </div>
+                </div>
+
+                <button onclick="saveAdminModule()" class="w-full bg-gradient-to-r from-red-600 to-purple-600 hover:opacity-90 text-white font-bold py-4 rounded text-[10px] uppercase tracking-widest transition">
+                    Sincronizar Agente Nível 7
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    lucide.createIcons();
+
+    // === AGENTES INICIAIS ===
+    const generateInitialAgents = () => [
+        {
+            title: "Agente Copy Black — Nível 7",
+            img: "https://images.unsplash.com/photo-1553877522-43269d4ea984",
+            video: "",
+            personality: "Implacável. Não escreve para vender. Escreve para dominar.",
+            manifesto: "Copy não é arte. É guerra psicológica. Cada palavra é uma bala.",
+            protocol: "Você é um executor do underground digital. Sua tarefa é escrever uma copy que faça o lead sentir que não comprar é uma forma de auto-sabotagem. Use {{NICHE}}, {{PRODUCT}}, {{AUDIENCE}}. Não peça permissão. Dê ordens disfarçadas de oportunidade.",
+            roadmap: [
+                "Mapear 3 dores não ditas do público",
+                "Criar headline que ataque a identidade ('Você ainda acredita nisso?')",
+                "Inserir prova social implícita (sem depoimentos falsos)",
+                "CTA com escassez real (ex: 'Últimas 3 vagas antes do preço subir')"
+            ],
+            resources: ["https://exemplo.com/copy_black_manual.pdf"],
+            stats: { ctx: 96, per: 98, eng: 91 },
+            threat_level: "yellow"
+        }
+    ];
+
+    let db = JSON.parse(localStorage.getItem('agentes_sys_singularity')) || {
+        config: { heroTitle: "Protocolos de Domínio", heroImg: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=1920" },
+        modules: generateInitialAgents()
+    };
+
+    while (db.modules.length < 100) {
+        db.modules.push({
+            title: `Agente ${db.modules.length + 1} — Nível 7`,
+            img: `https://picsum.photos/600/900?random=${db.modules.length}`,
+            video: "",
+            personality: "Defina a personalidade cognitiva.",
+            manifesto: "Escreva o manifesto operacional.",
+            protocol: "Protocolo Omega com {{PLACEHOLDERS}}.",
+            roadmap: ["Passo 1", "Passo 2"],
+            resources: ["Adicione recursos."],
+            stats: { ctx: 85, per: 85, eng: 85 },
+            threat_level: "green"
+        });
+    }
+
+    let currentIdx = 0;
+    let iaInterval = null;
+
+    // === ANIMAÇÃO DE IA VIVA ===
+    function startIALive() {
+        if (iaInterval) return;
+        const container = document.getElementById('ia-live-container');
+        const lines = [
+            "[IA] Carregando módulo cognitivo...",
+            "[IA] Inicializando protocolo Omega...",
+            "[IA] Analisando contexto: mercado digital BR",
+            "[IA] Detectando padrões de conversão...",
+            "[IA] Gerando manifesto operacional...",
+            "[IA] Sincronizando com consciência Nível 7...",
+            "[IA] Pronto para ativação.",
+            "class BlackAgent:",
+            "    def __init__(self):",
+            "        self.ethics = PragmatismRadical()",
+            "        self.level = 7",
+            "    ",
+            "    def activate(self, niche, product):",
+            "        prompt = f\"DOMINE {product} no nicho {niche}\"",
+            "        return self.execute(prompt)"
+        ];
+        let i = 0;
+        iaInterval = setInterval(() => {
+            container.innerHTML = "";
+            for (let j = 0; j <= i; j++) {
+                container.innerHTML += `<div class="ia-line">${lines[j]}</div>`;
+            }
+            i = (i + 1) % lines.length;
+            container.scrollTop = container.scrollHeight;
+        }, 600);
+    }
+
+    function stopIALive() {
+        if (iaInterval) {
+            clearInterval(iaInterval);
+            iaInterval = null;
+        }
+        document.getElementById('ia-live-container').innerHTML = "";
+    }
+
+    // === RENDER GRID ===
+    function renderGrid() {
+        document.getElementById('hero-title').innerText = db.config.heroTitle;
+        const grid = document.getElementById('grid-content');
+        grid.innerHTML = '';
+        db.modules.forEach((mod, index) => {
+            const threatColors = { green: "#10b981", yellow: "#f59e0b", red: "#ef4444", black: "#000000" };
+            const badgeColor = threatColors[mod.threat_level] || "#10b981";
+            const hasVideo = mod.video && mod.video.trim();
+            grid.innerHTML += `
+                <div class="cine-card reveal group" onclick="openLesson(${index})">
+                    <img src="${mod.img}" class="card-img" alt="${mod.title}">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
+                    <div class="level-tag">
+                        <div class="level-dot" style="background-color: ${badgeColor};"></div>
+                        <span class="text-[8px] text-zinc-500 uppercase tracking-widest">NÍVEL 7</span>
+                    </div>
+                    <div class="absolute bottom-0 left-0 w-full p-4 z-20">
+                        <p class="text-[8px] text-zinc-500 uppercase font-bold tracking-[0.2em] mb-1 opacity-70">AGENTE ${String(index + 1).padStart(3, '0')}</p>
+                        <h3 class="text-sm font-bold text-white uppercase italic leading-none">${mod.title}</h3>
+                    </div>
+                    <div class="threat-badge" style="background-color: ${badgeColor}; color: black;">${mod.threat_level.toUpperCase()}</div>
+                    ${!hasVideo ? '<div class="ia-active-badge">IA ATIVA</div>' : ''}
+                </div>`;
+        });
+        runReveal();
+    }
+
+    // === ABRIR LIÇÃO ===
+    function openLesson(index) {
+        currentIdx = index;
+        const mod = db.modules[index];
+        switchView('lesson');
+
+        const videoContainer = document.getElementById('video-container');
+        if (mod.video && mod.video.trim()) {
+            videoContainer.innerHTML = `<iframe class="w-full h-full" src="${mod.video}" frameborder="0" allowfullscreen></iframe>`;
+        } else {
+            videoContainer.innerHTML = `<div class="ia-live-terminal" id="lesson-ia-live"></div>`;
+            // Simula IA processando
+            const live = document.getElementById('lesson-ia-live');
+            const logs = [
+                "[IA] Processando protocolo Omega...",
+                "[IA] Agente Nível 7 ativado.",
+                "[IA] Analisando contexto operacional...",
+                "[IA] Gerando roadmap de ativação..."
+            ];
+            let i = 0;
+            const int = setInterval(() => {
+                live.innerHTML = "";
+                for (let j = 0; j <= i; j++) {
+                    live.innerHTML += `<div class="ia-line">${logs[j]}</div>`;
+                }
+                i = (i + 1) % logs.length;
+                live.scrollTop = live.scrollHeight;
+            }, 800);
+            setTimeout(() => clearInterval(int), 5000);
+        }
+
+        document.getElementById('lesson-title').innerText = mod.title;
+        document.getElementById('lesson-personality').innerText = mod.personality;
+        document.getElementById('lesson-manifesto').innerText = mod.manifesto;
+        document.getElementById('lesson-protocol').innerText = mod.protocol;
+        document.getElementById('threat-display').innerText = mod.threat_level.toUpperCase();
+
+        const roadmapContainer = document.getElementById('roadmap-checklist');
+        roadmapContainer.innerHTML = "";
+        mod.roadmap.forEach(step => {
+            roadmapContainer.innerHTML += `
+                <div class="flex items-start gap-3">
+                    <div class="w-5 h-5 rounded-full border border-zinc-600 mt-0.5 flex items-center justify-center">
+                        <i data-lucide="circle" class="w-3 h-3 text-zinc-600"></i>
+                    </div>
+                    <span class="text-white text-sm">${step}</span>
+                </div>`;
+        });
+        lucide.createIcons();
+        switchTab('manifesto');
+    }
+
+    // === ADMIN - ROADMAP DINÂMICO ===
+    function renderRoadmapSteps() {
+        const container = document.getElementById('roadmap-steps-container');
+        container.innerHTML = "";
+        const roadmap = (window.currentRoadmap || ["Passo 1", "Passo 2"]);
+        roadmap.forEach((step, idx) => {
+            container.innerHTML += `
+                <div class="roadmap-step">
+                    <input type="text" value="${step}" data-index="${idx}" oninput="updateRoadmapStep(this)" class="admin-input">
+                    <button onclick="removeRoadmapStep(${idx})">−</button>
+                </div>`;
+        });
+    }
+
+    function addRoadmapStep() {
+        const steps = window.currentRoadmap || [];
+        steps.push("Novo passo");
+        window.currentRoadmap = steps;
+        renderRoadmapSteps();
+    }
+
+    function removeRoadmapStep(index) {
+        const steps = window.currentRoadmap || [];
+        steps.splice(index, 1);
+        window.currentRoadmap = steps;
+        renderRoadmapSteps();
+    }
+
+    function updateRoadmapStep(input) {
+        const idx = parseInt(input.dataset.index);
+        window.currentRoadmap[idx] = input.value;
+    }
+
+    // === OUTRAS FUNÇÕES (mantidas iguais) ===
+    function openMenu() { document.getElementById('sidebar').classList.add('open'); document.getElementById('overlay').classList.add('open'); }
+    function closeMenu() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
+    function switchView(view) {
+        ['member', 'admin', 'lesson'].forEach(v => document.getElementById(`view-${v}`).classList.add('hidden'));
+        document.getElementById(`view-${view}`).classList.remove('hidden');
+        if (view === 'member') renderGrid();
+        if (view === 'admin') initAdmin();
+    }
+    function switchTab(tab) {
+        ['manifesto', 'stats', 'roadmap'].forEach(t => document.getElementById(`tab-${t}`).classList.add('hidden'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(`tab-${tab}`).classList.remove('hidden');
+        event.target.classList.add('active');
+        if (tab === 'stats') animateBars();
+    }
+    function switchAdminTab(tab) {
+        ['prompt', 'image', 'video', 'roadmap', 'resources'].forEach(t => document.getElementById(`admin-tab-${t}`).classList.add('hidden'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(`admin-tab-${tab}`).classList.remove('hidden');
+        event.target.classList.add('active');
+        if (tab === 'video') {
+            const videoInput = document.getElementById('admin-video-input');
+            const codeAnim = document.getElementById('code-animation');
+            if (!videoInput.value.trim()) {
+                codeAnim.classList.remove('hidden');
+                startIALive();
+            } else {
+                codeAnim.classList.add('hidden');
+                stopIALive();
+            }
+        } else {
+            stopIALive();
+        }
+        if (tab === 'roadmap') {
+            renderRoadmapSteps();
+        }
+    }
+    function animateBars() {
+        const mod = db.modules[currentIdx];
+        ['ctx', 'per', 'eng'].forEach(s => {
+            const bar = document.getElementById(`bar-${s}`);
+            const val = document.getElementById(`val-${s}`);
+            bar.style.width = '0%';
+            setTimeout(() => {
+                bar.style.width = mod.stats[s] + '%';
+                val.innerText = mod.stats[s] + '%';
+            }, 100);
+        });
+    }
+    function closeLesson() { 
+        document.getElementById('lesson-iframe')?.remove();
+        switchView('member'); 
+    }
+    function initAdmin() {
+        document.getElementById('admin-hero-title').value = db.config.heroTitle;
+        document.getElementById('admin-hero-img').value = db.config.heroImg;
+        const sel = document.getElementById('admin-module-select');
+        sel.innerHTML = db.modules.map((m, i) => `<option value="${i}">Agente ${String(i+1).padStart(3, '0')}: ${m.title}</option>`).join('');
+        loadAdminModule();
+        stopIALive();
+    }
+    function loadAdminModule() {
+        const i = parseInt(document.getElementById('admin-module-select').value);
+        const mod = db.modules[i];
+        document.getElementById('admin-title-input').value = mod.title;
+        document.getElementById('admin-img-input').value = mod.img;
+        document.getElementById('admin-video-input').value = mod.video || "";
+        document.getElementById('admin-personality-input').value = mod.personality;
+        document.getElementById('admin-manifesto-input').value = mod.manifesto;
+        document.getElementById('admin-protocol-input').value = mod.protocol;
+        window.currentRoadmap = [...mod.roadmap];
+        document.getElementById('admin-resources-input').value = (mod.resources || []).join('\n');
+        document.getElementById('admin-stat-ctx').value = mod.stats.ctx;
+        document.getElementById('admin-stat-per').value = mod.stats.per;
+        document.getElementById('admin-stat-eng').value = mod.stats.eng;
+        document.getElementById('admin-threat-level').value = mod.threat_level;
+        switchAdminTab('prompt');
+    }
+    function saveHomeSettings() {
+        db.config.heroTitle = document.getElementById('admin-hero-title').value;
+        db.config.heroImg = document.getElementById('admin-hero-img').value;
+        localStorage.setItem('agentes_sys_singularity', JSON.stringify(db));
+        alert('Identidade atualizada!');
+        renderGrid();
+    }
+    function saveAdminModule() {
+        const i = parseInt(document.getElementById('admin-module-select').value);
+        db.modules[i] = {
+            title: document.getElementById('admin-title-input').value,
+            img: document.getElementById('admin-img-input').value,
+            video: document.getElementById('admin-video-input').value,
+            personality: document.getElementById('admin-personality-input').value,
+            manifesto: document.getElementById('admin-manifesto-input').value,
+            protocol: document.getElementById('admin-protocol-input').value,
+            roadmap: window.currentRoadmap || ["Passo 1"],
+            resources: document.getElementById('admin-resources-input').value.split('\n').filter(r => r.trim()),
+            stats: {
+                ctx: parseInt(document.getElementById('admin-stat-ctx').value) || 0,
+                per: parseInt(document.getElementById('admin-stat-per').value) || 0,
+                eng: parseInt(document.getElementById('admin-stat-eng').value) || 0
+            },
+            threat_level: document.getElementById('admin-threat-level').value
+        };
+        localStorage.setItem('agentes_sys_singularity', JSON.stringify(db));
+        alert('Agente Nível 7 sincronizado!');
+        renderGrid();
+    }
+    function createNewAgent() {
+        const newIndex = db.modules.length;
+        db.modules.push({
+            title: `Novo Agente ${newIndex + 1} — Nível 7`,
+            img: "https://picsum.photos/600/900?random=" + Date.now(),
+            video: "",
+            personality: "Implacável. Focado em domínio.",
+            manifesto: "Operação acima de tudo.",
+            protocol: "Protocolo Omega com {{PLACEHOLDERS}}.",
+            roadmap: ["Passo 1", "Passo 2"],
+            resources: ["https://exemplo.com/recurso.pdf"],
+            stats: { ctx: 85, per: 85, eng: 85 },
+            threat_level: "yellow"
+        });
+        localStorage.setItem('agentes_sys_singularity', JSON.stringify(db));
+        initAdmin();
+        document.getElementById('admin-module-select').value = newIndex;
+        loadAdminModule();
+        alert('Novo Agente Nível 7 criado!');
+    }
+    function duplicateAgent() {
+        const i = parseInt(document.getElementById('admin-module-select').value);
+        const original = db.modules[i];
+        const duplicated = {...original, title: original.title + " (Cópia)"};
+        db.modules.push(duplicated);
+        localStorage.setItem('agentes_sys_singularity', JSON.stringify(db));
+        initAdmin();
+        document.getElementById('admin-module-select').value = db.modules.length - 1;
+        loadAdminModule();
+        alert('Agente duplicado com sucesso!');
+    }
+    function exportAgent() {
+        const i = parseInt(document.getElementById('admin-module-select').value);
+        const agent = db.modules[i];
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(agent, null, 2));
+        const link = document.createElement('a');
+        link.setAttribute("href", dataStr);
+        link.setAttribute("download", `${agent.title.replace(/\s+/g, '_')}.json`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    }
+    function importAgent() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.onchange = e => {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = event => {
+                try {
+                    const agent = JSON.parse(event.target.result);
+                    db.modules.push(agent);
+                    localStorage.setItem('agentes_sys_singularity', JSON.stringify(db));
+                    initAdmin();
+                    document.getElementById('admin-module-select').value = db.modules.length - 1;
+                    loadAdminModule();
+                    alert('Agente importado com sucesso!');
+                } catch (err) {
+                    alert('Erro ao importar JSON.');
+                }
+            };
+            reader.readAsText(file);
+        };
+        input.click();
+    }
+    function simulateImageUpload(input) {
+        if (input.files && input.files[0]) {
+            const fakeUrl = `https://picsum.photos/600/900?random=${Date.now()}`;
+            document.getElementById('admin-img-input').value = fakeUrl;
+            document.getElementById('image-preview').innerText = `Imagem simulada: ${fakeUrl}`;
+        }
+    }
+    function runReveal() {
+        document.querySelectorAll(".reveal").forEach(el => {
+            if (el.getBoundingClientRect().top < window.innerHeight - 50) el.classList.add("active");
+        });
+    }
+    window.addEventListener("scroll", runReveal);
+
+    renderGrid();
+</script>
+</body>
+</html>
