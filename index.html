@@ -3,24 +3,20 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>agentes.sys | Neural Network</title>
+    <title>agentes.sys | Neural Network Ads</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
 
     <style>
-        /* === RESET & CORE === */
-        body { margin: 0; overflow: hidden; background: #1a1a1a; font-family: 'Inter Tight', sans-serif; }
+        body { margin: 0; overflow: hidden; background: #0c0c0e; font-family: 'JetBrains Mono', monospace; }
         
-        /* === CAMADA 1: A REDE NEURAL (CANVAS) === */
         #neural-layer {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #18181b; /* Cor de fundo igual da imagem (Cinza escuro) */
-            z-index: 999999;
+            background: radial-gradient(circle at center, #111115 0%, #08080a 100%);
+            z-index: 9999;
             cursor: pointer;
-            transition: opacity 1.5s cubic-bezier(0.16, 1, 0.3, 1), transform 1.5s;
         }
 
         canvas { display: block; }
@@ -29,138 +25,29 @@
             position: absolute;
             bottom: 30px; left: 50%;
             transform: translateX(-50%);
-            color: rgba(255,255,255,0.4);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 12px;
-            letter-spacing: 2px;
+            color: rgba(255,255,255,0.3);
+            font-size: 10px;
+            letter-spacing: 3px;
             pointer-events: none;
             text-transform: uppercase;
             animation: pulse 2s infinite;
         }
 
-        @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.7; } }
-
-        /* === CAMADA 2: O SEU SITE (ORIGINAL) === */
-        #main-site {
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 2s ease 0.5s;
-            height: 100vh;
-            overflow-y: auto;
-            background: #0a0a0a;
-        }
-
-        /* Classe para ativar o site */
-        body.active #neural-layer {
-            opacity: 0;
-            transform: scale(1.1);
-            pointer-events: none;
-        }
-        body.active #main-site {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        /* === ESTILOS ORIGINAIS DO SEU SITE (MANTIDOS) === */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #000; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-        .sidebar-menu { position: fixed; top: 0; left: 0; height: 100vh; width: 280px; background: rgba(10, 10, 10, 0.98); border-right: 1px solid rgba(255,255,255,0.08); z-index: 10000; transform: translateX(-100%); transition: transform 0.5s; box-shadow: 10px 0 50px rgba(0,0,0,0.5); }
-        .sidebar-menu.open { transform: translateX(0); }
-        .menu-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9000; opacity: 0; pointer-events: none; transition: opacity 0.5s; }
-        .menu-overlay.open { opacity: 1; pointer-events: auto; }
-        .hover-trigger { position: fixed; top: 0; left: 0; width: 20px; height: 100vh; z-index: 9999; cursor: pointer; }
-        .hero-section { height: 100vh; width: 100%; background-size: cover; background-position: center; position: relative; z-index: 10; }
-        .cine-card { position: relative; aspect-ratio: 2/3; border-radius: 12px; overflow: hidden; cursor: pointer; border: 1px solid rgba(255, 255, 255, 0.05); transition: transform 0.4s; }
-        .cine-card:hover { transform: scale(1.03); z-index: 30; border-color: rgba(255, 255, 255, 0.25); }
-        .admin-input { background: #151515; border: 1px solid #333; color: white; padding: 10px; width: 100%; font-family: 'JetBrains Mono'; border-radius: 6px; }
-        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
-        .reveal.active { opacity: 1; transform: translateY(0); }
-        .tab-btn { padding: 10px 20px; font-size: 11px; font-weight: bold; text-transform: uppercase; border-bottom: 2px solid transparent; color: #666; transition: 0.3s; }
-        .tab-btn.active { color: white; border-bottom-color: #3b82f6; }
-        .level-tag { position: absolute; top: 12px; left: 12px; display: flex; gap: 4px; align-items: center; }
-        .level-dot { width: 6px; height: 6px; border-radius: 50%; }
-        .threat-badge { position: absolute; top: 12px; right: 12px; font-size: 9px; font-weight: bold; padding: 2px 6px; border-radius: 10px; text-transform: uppercase; }
+        @keyframes pulse { 0%, 100% { opacity: 0.2; } 50% { opacity: 0.6; } }
     </style>
 </head>
 <body>
 
-    <div id="neural-layer" onclick="enterSystem()">
+    <div id="neural-layer">
         <canvas id="networkCanvas"></canvas>
-        <div class="hint-text">[ AGENTES.SYS ]</div>
-    </div>
-
-    <div id="main-site">
-        <div id="boot-sequence" class="fixed inset-0 bg-black z-[999] flex items-center justify-center text-center font-mono" style="display:none;">
-            <div class="text-white">
-                <div class="text-3xl mb-2">[SYSTEM_CORE_OVERRIDE_LEVEL: OMEGA]</div>
-                <div class="text-xl mb-4">INITIATING SINGULARITY PROTOCOL...</div>
-                <div class="mt-6 w-80 h-1 bg-zinc-900 rounded-full overflow-hidden mx-auto">
-                    <div id="boot-bar" class="h-full bg-gradient-to-r from-blue-500 to-green-500 w-0"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="hover-trigger" onmouseenter="openMenu()"></div>
-        <div id="overlay" class="menu-overlay" onclick="closeMenu()"></div>
-
-        <aside id="sidebar" class="sidebar-menu flex flex-col p-8" onmouseleave="closeMenu()">
-            <div class="mb-10 flex items-center gap-3 border-b border-white/10 pb-6">
-                <div id="side-logo" class="w-10 h-10 bg-white text-black font-bold flex items-center justify-center rounded text-sm tracking-tighter">Ω</div>
-                <div>
-                    <span id="side-name" class="font-bold tracking-widest text-xl block uppercase italic">agentes.sys</span>
-                    <span class="text-[10px] text-zinc-500 uppercase tracking-widest">Núcleo de Singularidade</span>
-                </div>
-            </div>
-            <nav class="space-y-2 flex-1">
-                <button onclick="switchView('member')" class="flex items-center gap-4 w-full p-3 rounded hover:bg-white/5 text-zinc-400 hover:text-white transition group text-left">
-                    <i data-lucide="brain-circuit" class="w-5 h-5"></i> Centro de Operações
-                </button>
-                <button onclick="switchView('admin')" class="flex items-center gap-4 w-full p-3 rounded hover:bg-white/5 text-zinc-400 hover:text-white transition group text-left">
-                    <i data-lucide="settings" class="w-5 h-5"></i> Núcleo de Singularidade
-                </button>
-            </nav>
-        </aside>
-
-        <div id="view-member" class="transition-opacity duration-500">
-            <section id="main-hero" class="hero-section" style="background-image: url('https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=1920&auto=format&fit=crop');">
-                <div class="hero-fade-bottom"></div>
-                <div class="absolute bottom-20 left-12 reveal">
-                    <h1 id="hero-title" class="text-7xl font-black italic tracking-tighter uppercase mb-2">Protocolos de Domínio</h1>
-                    <p id="hero-subtitle" class="text-zinc-500 text-sm uppercase tracking-[0.5em] mono">Sincronize. Ative. Domine.</p>
-                </div>
-            </section>
-            <section class="max-w-[1600px] mx-auto px-6 py-20 bg-[#0a0a0a] relative z-20">
-                <div id="grid-content" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6"></div>
-                <div class="h-40"></div>
-            </section>
-        </div>
-
-        <div id="view-admin" class="hidden bg-black min-h-screen p-12">
-             <div class="text-white">Admin Panel Loaded</div>
-             <button onclick="switchView('member')" class="text-white border p-2 mt-4">Voltar</button>
-        </div>
-        <div id="view-lesson" class="hidden fixed inset-0 bg-[#0a0a0a] z-[80] overflow-y-auto">
-             <div class="text-white p-10">
-                 <button onclick="closeLesson()" class="text-white border p-2 mb-4">Voltar</button>
-                 <h1 id="lesson-title" class="text-4xl"></h1>
-                 <div id="video-container" class="mt-4 aspect-video bg-gray-800"></div>
-                 <div id="tab-manifesto" class="mt-4"></div>
-             </div>
-        </div>
+        <div class="hint-text">[ NÚCLEO DE TRÁFEGO ATIVO ]</div>
     </div>
 
 <script>
-    lucide.createIcons();
-
-    /* =================================================================
-       LÓGICA DA REDE NEURAL (TIPO IMAGEM DO INSTAGRAM)
-       ================================================================= */
     const canvas = document.getElementById('networkCanvas');
     const ctx = canvas.getContext('2d');
-    let width, height;
+    let width, height, isMobile;
     
-    // Lista de palavras igual da imagem para parecer um "cérebro de marketing"
     const terms = [
         "Facebook Ads", "Estrutura", "Copywriting", "VSL", "Tráfego", "Funil", "Data", "CPA", 
         "ROI", "Scale", "Lead", "Pixel", "API", "Bot", "Offer", "Hook", 
@@ -170,28 +57,34 @@
     ];
 
     let nodes = [];
+    let centralNode;
     const config = {
-        nodeCount: 150, // Densidade alta
-        connectionDist: 150, // Distância para conectar linhas
-        mouseDist: 200,
-        speed: 0.3 // Movimento lento estilo "cérebro pensando"
+        nodeCount: 400, 
+        connectionDist: 130, 
+        mouseDist: 180,
+        speed: 0.22 
     };
 
-    let mouse = { x: null, y: null };
-
-    // Ajuste de tela
     function resize() {
         width = canvas.width = window.innerWidth;
         height = canvas.height = window.innerHeight;
+        isMobile = width < 768;
+        
+        centralNode = {
+            x: width / 2,
+            y: height / 2,
+            size: 4,
+            glow: 0
+        };
     }
     window.addEventListener('resize', resize);
     resize();
 
+    let mouse = { x: null, y: null };
     window.addEventListener('mousemove', e => {
         mouse.x = e.x;
         mouse.y = e.y;
     });
-    window.addEventListener('mouseleave', () => { mouse.x = null; mouse.y = null; });
 
     class Node {
         constructor() {
@@ -199,69 +92,86 @@
             this.y = Math.random() * height;
             this.vx = (Math.random() - 0.5) * config.speed;
             this.vy = (Math.random() - 0.5) * config.speed;
-            this.size = Math.random() * 2 + 1;
-            // 40% de chance de ter texto
-            this.text = Math.random() > 0.6 ? terms[Math.floor(Math.random() * terms.length)] : null;
+            this.z = Math.random(); 
+            this.size = this.z * 1.5 + 0.5;
+            
+            // Frequência de nomes: No mobile reduzimos um pouco para não poluir
+            const threshold = isMobile ? 0.94 : 0.88;
+            this.text = Math.random() > threshold ? terms[Math.floor(Math.random() * terms.length)] : null;
         }
 
         update() {
             this.x += this.vx;
             this.y += this.vy;
 
-            // Rebater nas bordas
             if (this.x < 0 || this.x > width) this.vx *= -1;
             if (this.y < 0 || this.y > height) this.vy *= -1;
 
-            // Interação com Mouse (Repulsão suave para abrir caminho)
             if (mouse.x) {
                 let dx = mouse.x - this.x;
                 let dy = mouse.y - this.y;
                 let dist = Math.sqrt(dx*dx + dy*dy);
                 if (dist < config.mouseDist) {
                     const force = (config.mouseDist - dist) / config.mouseDist;
-                    const dirX = dx / dist;
-                    const dirY = dy / dist;
-                    this.x -= dirX * force * 1; // Empurra levemente
-                    this.y -= dirY * force * 1;
+                    this.x -= (dx / dist) * force * 2;
+                    this.y -= (dy / dist) * force * 2;
                 }
             }
         }
 
         draw() {
-            // Desenhar o Ponto
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            ctx.fillStyle = '#ffffff';
+            ctx.fillStyle = `rgba(255, 255, 255, ${this.z * 0.5 + 0.2})`;
             ctx.fill();
 
-            // Desenhar o Texto (se tiver)
             if (this.text) {
-                ctx.font = '10px "JetBrains Mono"';
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-                ctx.fillText(this.text, this.x + 8, this.y + 3);
+                // AJUSTE MOBILE: Nomes agora entre 10px e 12px (antes era 14-20)
+                const fontSize = isMobile ? (this.z * 2 + 10) : (this.z * 4 + 9);
+                ctx.font = `bold ${Math.floor(fontSize)}px "JetBrains Mono"`;
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.z * 0.4 + 0.3})`;
+                ctx.fillText(this.text.toUpperCase(), this.x + 8, this.y + 4);
             }
         }
     }
 
-    // Inicializar Nós
+    function drawCentralNode() {
+        centralNode.glow = Math.sin(Date.now() / 1000) * 20 + 30;
+        
+        ctx.save();
+        ctx.shadowBlur = centralNode.glow;
+        ctx.shadowColor = "#3b82f6";
+        
+        ctx.beginPath();
+        ctx.arc(centralNode.x, centralNode.y, centralNode.size, 0, Math.PI * 2);
+        ctx.fillStyle = "#3b82f6";
+        ctx.fill();
+        
+        ctx.shadowBlur = 0;
+        // Nome central ajustado para não ficar gigante no celular
+        ctx.font = `bold ${isMobile ? 16 : 18}px "JetBrains Mono"`;
+        ctx.fillStyle = "#ffffff";
+        ctx.textAlign = "center";
+        ctx.fillText("agentes.sys", centralNode.x, centralNode.y - 18);
+        ctx.restore();
+        ctx.textAlign = "left";
+    }
+
     function initNodes() {
         nodes = [];
         for(let i=0; i<config.nodeCount; i++) nodes.push(new Node());
     }
     initNodes();
 
-    // Loop de Animação
     function animate() {
         ctx.clearRect(0, 0, width, height);
         
-        // Atualizar e Desenhar Nós
         for (let i = 0; i < nodes.length; i++) {
             let node = nodes[i];
             node.update();
             node.draw();
 
-            // Desenhar Linhas (Conexões)
-            for (let j = i; j < nodes.length; j++) {
+            for (let j = i + 1; j < nodes.length; j++) {
                 let other = nodes[j];
                 let dx = node.x - other.x;
                 let dy = node.y - other.y;
@@ -269,135 +179,31 @@
 
                 if (dist < config.connectionDist) {
                     ctx.beginPath();
-                    // Opacidade baseada na distância
-                    let opacity = 1 - (dist / config.connectionDist);
-                    ctx.strokeStyle = `rgba(200, 200, 200, ${opacity * 0.3})`; // Linha cinza claro
+                    let opacity = (1 - (dist / config.connectionDist)) * 0.15;
+                    ctx.strokeStyle = `rgba(200, 210, 255, ${opacity})`;
                     ctx.lineWidth = 0.5;
                     ctx.moveTo(node.x, node.y);
                     ctx.lineTo(other.x, other.y);
                     ctx.stroke();
                 }
             }
-            
-            // Conexão extra com o mouse (Raio)
-            if (mouse.x) {
-                let dx = mouse.x - node.x;
-                let dy = mouse.y - node.y;
-                let dist = Math.sqrt(dx*dx + dy*dy);
-                if (dist < 150) {
-                    ctx.beginPath();
-                    ctx.strokeStyle = `rgba(255, 255, 255, ${1 - dist/150})`;
-                    ctx.lineWidth = 0.8;
-                    ctx.moveTo(node.x, node.y);
-                    ctx.lineTo(mouse.x, mouse.y);
-                    ctx.stroke();
-                }
+
+            let dxC = node.x - centralNode.x;
+            let dyC = node.y - centralNode.y;
+            let distC = Math.sqrt(dxC*dxC + dyC*dyC);
+            if (distC < 200) {
+                ctx.beginPath();
+                ctx.strokeStyle = `rgba(59, 130, 246, ${(1 - distC/200) * 0.1})`;
+                ctx.moveTo(node.x, node.y);
+                ctx.lineTo(centralNode.x, centralNode.y);
+                ctx.stroke();
             }
         }
-
-        if (!document.body.classList.contains('active')) {
-            requestAnimationFrame(animate);
-        }
+        
+        drawCentralNode();
+        requestAnimationFrame(animate);
     }
     animate();
-
-    /* =================================================================
-       LÓGICA DO SISTEMA (TRANSIÇÃO E DADOS)
-       ================================================================= */
-    
-    function enterSystem() {
-        document.body.classList.add('active');
-        
-        // Espera animação e inicia o boot falso
-        setTimeout(() => {
-            const bootSeq = document.getElementById('boot-sequence');
-            bootSeq.style.display = 'flex';
-            
-            let w = 0;
-            const bar = document.getElementById('boot-bar');
-            const int = setInterval(() => {
-                w += 2;
-                bar.style.width = w + '%';
-                if (w >= 100) {
-                    clearInterval(int);
-                    setTimeout(() => {
-                        bootSeq.remove();
-                    }, 200);
-                }
-            }, 10); // Carregamento rápido
-        }, 800);
-    }
-
-    // === SEUS DADOS E FUNÇÕES DO DASHBOARD ===
-    let db = JSON.parse(localStorage.getItem('agentes_sys_singularity')) || {
-        config: { heroTitle: "Protocolos de Domínio" },
-        modules: []
-    };
-
-    // Gerar dados se vazio
-    if (db.modules.length === 0) {
-        for(let i=1; i<=10; i++) {
-            db.modules.push({
-                title: `Agente ${i} — Nível 7`,
-                img: `https://picsum.photos/600/900?random=${i}`,
-                threat_level: "green",
-                video: ""
-            });
-        }
-    }
-
-    // Render Grid
-    function renderGrid() {
-        const grid = document.getElementById('grid-content');
-        grid.innerHTML = '';
-        document.getElementById('hero-title').innerText = db.config.heroTitle;
-
-        db.modules.forEach((mod, index) => {
-            const colors = { green: "#10b981", yellow: "#f59e0b", red: "#ef4444" };
-            const color = colors[mod.threat_level] || "#fff";
-            
-            grid.innerHTML += `
-                <div class="cine-card reveal group" onclick="openLesson(${index})">
-                    <img src="${mod.img}" class="card-img" alt="${mod.title}">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
-                    <div class="level-tag">
-                        <div class="level-dot" style="background-color: ${color};"></div>
-                        <span class="text-[8px] text-zinc-500 uppercase tracking-widest">NÍVEL 7</span>
-                    </div>
-                    <div class="absolute bottom-0 left-0 w-full p-4 z-20">
-                        <p class="text-[8px] text-zinc-500 uppercase font-bold tracking-[0.2em] mb-1 opacity-70">AGENTE ${String(index + 1).padStart(3, '0')}</p>
-                        <h3 class="text-sm font-bold text-white uppercase italic leading-none">${mod.title}</h3>
-                    </div>
-                </div>`;
-        });
-        
-        // Reativar reveals
-        setTimeout(() => {
-            document.querySelectorAll(".reveal").forEach(el => el.classList.add("active"));
-        }, 100);
-    }
-
-    function openMenu() { document.querySelector('.sidebar-menu').classList.add('open'); document.querySelector('.menu-overlay').classList.add('open'); }
-    function closeMenu() { document.querySelector('.sidebar-menu').classList.remove('open'); document.querySelector('.menu-overlay').classList.remove('open'); }
-    
-    function switchView(view) {
-        ['member', 'admin', 'lesson'].forEach(v => document.getElementById(`view-${v}`).classList.add('hidden'));
-        document.getElementById(`view-${view}`).classList.remove('hidden');
-        if(view === 'member') renderGrid();
-    }
-
-    function openLesson(index) {
-        switchView('lesson');
-        const mod = db.modules[index];
-        document.getElementById('lesson-title').innerText = mod.title;
-        document.getElementById('video-container').innerHTML = mod.video ? `<iframe src="${mod.video}" class="w-full h-full"></iframe>` : '<div class="flex items-center justify-center h-full text-zinc-500">IA Gerando Protocolo...</div>';
-    }
-    
-    function closeLesson() { switchView('member'); }
-
-    // Start
-    renderGrid();
-
 </script>
 </body>
 </html>
