@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>agentes.sys | Neural Network Ads</title>
+    <title>agentes.sys | Neural Network</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
@@ -16,31 +16,43 @@
             top: 0; left: 0; width: 100vw; height: 100vh;
             background: radial-gradient(circle at center, #111115 0%, #08080a 100%);
             z-index: 9999;
+            transition: transform 1.2s cubic-bezier(0.7, 0, 0.3, 1), opacity 1s ease;
             cursor: pointer;
+        }
+
+        /* Efeito de Zoom na Transição */
+        .system-entering {
+            transform: scale(4);
+            opacity: 0;
+            pointer-events: none;
         }
 
         canvas { display: block; }
 
         .hint-text {
             position: absolute;
-            bottom: 30px; left: 50%;
+            bottom: 40px; left: 50%;
             transform: translateX(-50%);
-            color: rgba(255,255,255,0.3);
+            color: #3b82f6;
             font-size: 10px;
-            letter-spacing: 3px;
+            font-weight: bold;
+            letter-spacing: 4px;
             pointer-events: none;
             text-transform: uppercase;
             animation: pulse 2s infinite;
         }
 
-        @keyframes pulse { 0%, 100% { opacity: 0.2; } 50% { opacity: 0.6; } }
+        @keyframes pulse { 
+            0%, 100% { opacity: 0.3; transform: translateX(-50%) scale(1); } 
+            50% { opacity: 0.8; transform: translateX(-50%) scale(1.05); } 
+        }
     </style>
 </head>
 <body>
 
     <div id="neural-layer">
         <canvas id="networkCanvas"></canvas>
-        <div class="hint-text">[ NÚCLEO DE TRÁFEGO ATIVO ]</div>
+        <div class="hint-text">ACESSAR NÚCLEO</div>
     </div>
 
 <script>
@@ -58,10 +70,12 @@
 
     let nodes = [];
     let centralNode;
+    let isEntering = false;
+
     const config = {
-        nodeCount: 400, 
-        connectionDist: 130, 
-        mouseDist: 180,
+        nodeCount: 550, // Densidade alta para Desktop
+        connectionDist: 140, 
+        mouseDist: 200,
         speed: 0.22 
     };
 
@@ -70,15 +84,37 @@
         height = canvas.height = window.innerHeight;
         isMobile = width < 768;
         
+        // Ajustes Diferenciados
+        if (isMobile) {
+            config.nodeCount = 130;
+            config.connectionDist = 110;
+        } else {
+            config.nodeCount = 550;
+            config.connectionDist = 140;
+        }
+
         centralNode = {
             x: width / 2,
             y: height / 2,
-            size: 4,
+            size: isMobile ? 6 : 3, // Bolinha central bem menor no Desktop
             glow: 0
         };
+        initNodes();
     }
+
     window.addEventListener('resize', resize);
-    resize();
+
+    // Clique no núcleo para transição
+    window.addEventListener('mousedown', e => {
+        if (isEntering) return;
+        const dx = e.clientX - centralNode.x;
+        const dy = e.clientY - centralNode.y;
+        if (Math.sqrt(dx*dx + dy*dy) < 60) {
+            isEntering = true;
+            document.getElementById('neural-layer').classList.add('system-entering');
+            setTimeout(() => { console.log("Redirecionando..."); }, 1200);
+        }
+    });
 
     let mouse = { x: null, y: null };
     window.addEventListener('mousemove', e => {
@@ -93,21 +129,22 @@
             this.vx = (Math.random() - 0.5) * config.speed;
             this.vy = (Math.random() - 0.5) * config.speed;
             this.z = Math.random(); 
-            this.size = this.z * 1.5 + 0.5;
             
-            // Frequência de nomes: No mobile reduzimos um pouco para não poluir
-            const threshold = isMobile ? 0.94 : 0.88;
+            // Bolinhas maiores no Mobile, menores e densas no Desktop
+            this.size = isMobile ? (this.z * 3 + 2.5) : (this.z * 1.5 + 0.5);
+            
+            // Threshold: 0.82 no desktop (aparece muito mais nome)
+            const threshold = isMobile ? 0.94 : 0.82;
             this.text = Math.random() > threshold ? terms[Math.floor(Math.random() * terms.length)] : null;
         }
 
         update() {
             this.x += this.vx;
             this.y += this.vy;
-
             if (this.x < 0 || this.x > width) this.vx *= -1;
             if (this.y < 0 || this.y > height) this.vy *= -1;
 
-            if (mouse.x) {
+            if (mouse.x && !isEntering) {
                 let dx = mouse.x - this.x;
                 let dy = mouse.y - this.y;
                 let dist = Math.sqrt(dx*dx + dy*dy);
@@ -126,83 +163,72 @@
             ctx.fill();
 
             if (this.text) {
-                // AJUSTE MOBILE: Nomes agora entre 10px e 12px (antes era 14-20)
-                const fontSize = isMobile ? (this.z * 2 + 10) : (this.z * 4 + 9);
+                const fontSize = isMobile ? (this.z * 2 + 11) : (this.z * 5 + 10);
                 ctx.font = `bold ${Math.floor(fontSize)}px "JetBrains Mono"`;
                 ctx.fillStyle = `rgba(255, 255, 255, ${this.z * 0.4 + 0.3})`;
-                ctx.fillText(this.text.toUpperCase(), this.x + 8, this.y + 4);
+                ctx.fillText(this.text.toUpperCase(), this.x + 10, this.y + 4);
             }
         }
     }
 
     function drawCentralNode() {
-        centralNode.glow = Math.sin(Date.now() / 1000) * 20 + 30;
-        
+        // Brilho azul longo
+        centralNode.glow = Math.sin(Date.now() / 1000) * 30 + 40;
         ctx.save();
         ctx.shadowBlur = centralNode.glow;
         ctx.shadowColor = "#3b82f6";
-        
         ctx.beginPath();
         ctx.arc(centralNode.x, centralNode.y, centralNode.size, 0, Math.PI * 2);
         ctx.fillStyle = "#3b82f6";
         ctx.fill();
-        
         ctx.shadowBlur = 0;
-        // Nome central ajustado para não ficar gigante no celular
-        ctx.font = `bold ${isMobile ? 16 : 18}px "JetBrains Mono"`;
+        ctx.font = `bold ${isMobile ? 18 : 22}px "JetBrains Mono"`;
         ctx.fillStyle = "#ffffff";
         ctx.textAlign = "center";
-        ctx.fillText("agentes.sys", centralNode.x, centralNode.y - 18);
+        ctx.fillText(isEntering ? "SINCRONIZANDO..." : "agentes.sys", centralNode.x, centralNode.y - 25);
         ctx.restore();
-        ctx.textAlign = "left";
     }
 
     function initNodes() {
         nodes = [];
         for(let i=0; i<config.nodeCount; i++) nodes.push(new Node());
     }
-    initNodes();
 
     function animate() {
         ctx.clearRect(0, 0, width, height);
-        
         for (let i = 0; i < nodes.length; i++) {
             let node = nodes[i];
             node.update();
             node.draw();
-
             for (let j = i + 1; j < nodes.length; j++) {
-                let other = nodes[j];
-                let dx = node.x - other.x;
-                let dy = node.y - other.y;
+                let dx = node.x - nodes[j].x;
+                let dy = node.y - nodes[j].y;
                 let dist = Math.sqrt(dx*dx + dy*dy);
-
                 if (dist < config.connectionDist) {
                     ctx.beginPath();
-                    let opacity = (1 - (dist / config.connectionDist)) * 0.15;
-                    ctx.strokeStyle = `rgba(200, 210, 255, ${opacity})`;
-                    ctx.lineWidth = 0.5;
+                    ctx.strokeStyle = `rgba(200, 210, 255, ${(1 - dist/config.connectionDist) * 0.15})`;
                     ctx.moveTo(node.x, node.y);
-                    ctx.lineTo(other.x, other.y);
+                    ctx.lineTo(nodes[j].x, nodes[j].y);
                     ctx.stroke();
                 }
             }
-
+            // Conexão com o centro
             let dxC = node.x - centralNode.x;
             let dyC = node.y - centralNode.y;
             let distC = Math.sqrt(dxC*dxC + dyC*dyC);
-            if (distC < 200) {
+            if (distC < 250) {
                 ctx.beginPath();
-                ctx.strokeStyle = `rgba(59, 130, 246, ${(1 - distC/200) * 0.1})`;
+                ctx.strokeStyle = `rgba(59, 130, 246, ${(1 - distC/250) * 0.12})`;
                 ctx.moveTo(node.x, node.y);
                 ctx.lineTo(centralNode.x, centralNode.y);
                 ctx.stroke();
             }
         }
-        
         drawCentralNode();
         requestAnimationFrame(animate);
     }
+
+    resize();
     animate();
 </script>
 </body>
