@@ -2,234 +2,376 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>agentes.sys | Neural Network</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    
+    <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
+    <meta name="background-color" content="#0a0a0a">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Agentes.sys">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <link rel="manifest" href="./manifest.json">
+
+    <title>agentes.sys | Neural Gateway</title>
+
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter+Tight:wght@300;400;600;800&display=swap" rel="stylesheet" />
 
     <style>
-        body { margin: 0; overflow: hidden; background: #0c0c0e; font-family: 'JetBrains Mono', monospace; }
+        /* === RESET & BASE === */
+        :root { --bg-dark: #0a0a0a; --primary: #3b82f6; --safe-top: env(safe-area-inset-top); --safe-bottom: env(safe-area-inset-bottom); }
+        body { 
+            background: var(--bg-dark); font-family: 'Inter Tight', sans-serif; color: white; margin: 0; overflow: hidden;
+            -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+        }
+
+        /* === NEURAL LAYER === */
+        #neural-layer { position: fixed; inset: 0; background: radial-gradient(circle at center, #111115 0%, #08080a 100%); z-index: 2000; transition: opacity 1s ease; cursor: pointer; }
+        #neural-layer.background-mode { z-index: -1; pointer-events: none; opacity: 0.6; }
+        canvas { display: block; width: 100%; height: 100%; }
+
+        /* === UI ELEMENTS === */
+        #app-container { display: none; opacity: 0; transition: opacity 1.5s ease; position: relative; z-index: 10; height: 100vh; overflow-y: auto; overflow-x: hidden; scroll-behavior: smooth; }
+        #app-container.active { display: block; opacity: 1; }
         
-        #neural-layer {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: radial-gradient(circle at center, #111115 0%, #08080a 100%);
-            z-index: 9999;
-            transition: transform 1.2s cubic-bezier(0.7, 0, 0.3, 1), opacity 1s ease;
-            cursor: pointer;
+        .cine-card { 
+            position: relative; aspect-ratio: 2/3; border-radius: 12px; overflow: hidden; cursor: pointer; 
+            border: 1px solid rgba(255, 255, 255, 0.05); transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); background: rgba(0,0,0,0.4);
         }
+        .cine-card:active { transform: scale(0.98); } /* Feedback tátil */
+        .card-img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(85%) brightness(60%); transition: filter 0.6s ease; }
+        .cine-card:hover .card-img, .cine-card:active .card-img { filter: grayscale(0%) brightness(110%); }
 
-        /* Efeito de Zoom na Transição */
-        .system-entering {
-            transform: scale(4);
-            opacity: 0;
-            pointer-events: none;
+        /* === SIDEBAR & MENUS === */
+        .hover-trigger { position: fixed; top: 0; left: 0; width: 20px; height: 100vh; z-index: 9999; }
+        .sidebar-menu { 
+            position: fixed; top: 0; left: 0; height: 100vh; width: 280px; background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255,255,255,0.08); z-index: 10000; transform: translateX(-100%); 
+            transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1); padding-top: var(--safe-top);
         }
+        .sidebar-menu.open { transform: translateX(0); }
+        .menu-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9000; opacity: 0; pointer-events: none; transition: opacity 0.4s; }
+        .menu-overlay.open { opacity: 1; pointer-events: auto; }
 
-        canvas { display: block; }
+        /* === UTILS === */
+        .admin-input { background: #151515; border: 1px solid #333; color: white; padding: 12px; width: 100%; font-size: 16px; font-family: 'JetBrains Mono'; border-radius: 8px; margin-bottom: 0.5rem; }
+        .tab-btn { padding: 12px 20px; font-size: 12px; font-weight: bold; text-transform: uppercase; border-bottom: 2px solid transparent; color: #666; transition: 0.3s; flex-shrink: 0; }
+        .tab-btn.active { color: white; border-bottom-color: var(--primary); }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
 
-        .hint-text {
-            position: absolute;
-            bottom: 40px; left: 50%;
-            transform: translateX(-50%);
-            color: #3b82f6;
-            font-size: 10px;
-            font-weight: bold;
-            letter-spacing: 4px;
-            pointer-events: none;
-            text-transform: uppercase;
-            animation: pulse 2s infinite;
+        /* === RESPONSIVE FIXES === */
+        @media (max-width: 768px) {
+            #hero-title { font-size: 2.5rem; line-height: 1.1; }
+            #grid-content { grid-template-columns: repeat(2, 1fr); padding-bottom: 120px; }
+            .sidebar-menu { width: 85vw; }
         }
-
-        @keyframes pulse { 
-            0%, 100% { opacity: 0.3; transform: translateX(-50%) scale(1); } 
-            50% { opacity: 0.8; transform: translateX(-50%) scale(1.05); } 
-        }
+        .safe-padding { padding-top: var(--safe-top); padding-bottom: var(--safe-bottom); }
     </style>
 </head>
 <body>
 
+    <div id="boot-sequence" class="fixed inset-0 bg-black z-[2100] flex items-center justify-center text-center font-mono safe-padding">
+        <div class="text-white w-full px-8">
+            <div class="text-3xl mb-2 font-bold tracking-tighter">Agente IA</div>
+            <div class="text-xs text-zinc-500 uppercase tracking-widest mb-6">Inicializando Core v2.1</div>
+            <div class="w-full h-1 bg-zinc-900 rounded-full overflow-hidden">
+                <div id="boot-bar" class="h-full bg-blue-600 w-0 transition-all duration-75"></div>
+            </div>
+        </div>
+    </div>
+
     <div id="neural-layer">
         <canvas id="networkCanvas"></canvas>
-        <div class="hint-text">ACESSAR NÚCLEO</div>
+        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 text-blue-500 text-[10px] font-bold tracking-[4px] uppercase animate-pulse font-mono pointer-events-none">
+            Toque para iniciar
+        </div>
+    </div>
+
+    <div id="app-container" class="custom-scrollbar">
+        <div class="hover-trigger" onmouseenter="openMenu()"></div>
+        <div id="overlay" class="menu-overlay" onclick="closeMenu()"></div>
+
+        <aside id="sidebar" class="sidebar-menu flex flex-col p-6" onmouseleave="closeMenu()">
+            <div class="mb-8 flex items-center gap-3 border-b border-white/10 pb-6">
+                <div class="w-10 h-10 bg-white text-black font-bold flex items-center justify-center rounded text-sm">Ω</div>
+                <div>
+                    <span class="font-bold tracking-widest text-lg block uppercase italic">agentes.sys</span>
+                    <span class="text-[9px] text-zinc-500 uppercase tracking-widest">Singularity Core</span>
+                </div>
+            </div>
+            <nav class="space-y-2 flex-1">
+                <button onclick="switchView('member')" class="flex items-center gap-4 w-full p-4 rounded-lg hover:bg-white/5 text-zinc-400 hover:text-white transition text-left text-sm font-medium">
+                    <i data-lucide="brain-circuit" class="w-5 h-5"></i> Centro de Operações
+                </button>
+                <button onclick="switchView('admin')" class="flex items-center gap-4 w-full p-4 rounded-lg hover:bg-white/5 text-zinc-400 hover:text-white transition text-left text-sm font-medium">
+                    <i data-lucide="settings" class="w-5 h-5"></i> Admin Console
+                </button>
+            </nav>
+        </aside>
+
+        <div id="view-member" class="min-h-screen">
+            <section class="h-[60vh] w-full bg-cover bg-center relative flex items-end p-8" id="hero-bg">
+                <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/50 to-transparent"></div>
+                <div class="relative z-20 max-w-4xl"> 
+                    <h1 id="hero-title" class="text-5xl md:text-7xl font-black italic tracking-tighter uppercase mb-2 text-white">Ecossistemas SYS</h1>
+                    <p class="text-zinc-400 text-xs md:text-sm uppercase tracking-[0.3em] font-mono">Sincronize. Ative. Domine.</p>
+                </div>
+            </section>
+            <section class="max-w-[1600px] mx-auto px-4 md:px-8 py-12 relative z-20 safe-padding">
+                <div id="grid-content" class="grid gap-4 md:gap-6"></div>
+            </section>
+        </div>
+
+        <div id="view-lesson" class="fixed inset-0 bg-[#0a0a0a] z-[100] hidden overflow-y-auto custom-scrollbar">
+            <div class="h-16 border-b border-white/10 flex items-center px-4 md:px-8 sticky top-0 bg-[#0a0a0a]/90 backdrop-blur z-50 justify-between safe-padding">
+                <button onclick="closeLesson()" class="flex items-center gap-2 text-zinc-400 hover:text-white transition uppercase tracking-widest text-[10px] font-bold py-2">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar
+                </button>
+                <div class="text-[10px] font-mono text-green-500 flex items-center gap-2 uppercase tracking-widest">
+                    <i data-lucide="cpu" class="w-3 h-3"></i> Online
+                </div>
+            </div>
+            <div class="max-w-7xl mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8 mt-2 safe-padding">
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="aspect-video w-full bg-black rounded-2xl border border-white/10 relative overflow-hidden">
+                        <div id="video-container" class="w-full h-full"></div>
+                    </div>
+                    <div class="flex border-b border-white/10 overflow-x-auto no-scrollbar">
+                        <button class="tab-btn active" onclick="switchTab('manifesto')">Manifesto</button>
+                        <button class="tab-btn" onclick="switchTab('prompt')">Prompt Mestre</button>
+                    </div>
+                    <div id="tab-content" class="py-4 min-h-[300px]">
+                        <div id="tab-manifesto">
+                            <h1 id="lesson-title" class="text-3xl font-bold uppercase italic tracking-tighter mb-4"></h1>
+                            <p id="lesson-manifesto" class="text-zinc-300 leading-relaxed"></p>
+                            <div class="bg-zinc-900/50 p-6 rounded-lg border border-white/5 mt-6">
+                                <div class="text-xs uppercase text-red-400 tracking-widest mono mb-2">Protocolo Omega</div>
+                                <p class="text-xs font-mono text-red-300 break-words" id="lesson-protocol"></p>
+                            </div>
+                        </div>
+                        <div id="tab-prompt" class="hidden">
+                            <div class="bg-[#050505] border border-white/10 rounded-lg p-4 relative">
+                                <button onclick="copyPrompt()" class="absolute top-4 right-4 p-2 bg-blue-600 rounded text-xs font-bold uppercase hover:bg-blue-500">Copiar</button>
+                                <pre id="lesson-master-prompt" class="text-xs text-zinc-400 font-mono whitespace-pre-wrap overflow-x-auto h-[400px]"></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-admin" class="hidden bg-black min-h-screen p-6 safe-padding">
+            <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 border-b border-white/10 pb-6">
+                <div>
+                    <h2 class="text-2xl font-black italic tracking-tighter uppercase">Núcleo Singularidade</h2>
+                    <p class="text-zinc-500 text-[10px] uppercase mono tracking-[0.3em]">System Config v2.1</p>
+                </div>
+                <button onclick="switchView('member')" class="text-xs uppercase font-bold border border-white/10 px-6 py-3 rounded-lg hover:bg-white hover:text-black transition w-full md:w-auto">Sair</button>
+            </header>
+            <div class="max-w-2xl mx-auto space-y-6">
+                <div class="bg-[#121212] border border-white/10 rounded-xl p-6">
+                    <h3 class="text-sm font-bold uppercase text-blue-500 mb-4">Gerenciar Agentes</h3>
+                    <select id="admin-module-select" onchange="loadAdminModule()" class="admin-input cursor-pointer mb-4"></select>
+                    <input id="admin-title-input" type="text" placeholder="Nome do Agente" class="admin-input">
+                    <textarea id="admin-manifesto-input" rows="3" class="admin-input" placeholder="Manifesto"></textarea>
+                    <button onclick="saveAdminModule()" class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-lg font-bold uppercase text-sm mt-4">Salvar Alterações</button>
+                    <button onclick="createNewAgent()" class="w-full border border-white/10 hover:bg-white/5 py-3 rounded-lg font-bold uppercase text-sm mt-2 text-zinc-400">Criar Novo Agente</button>
+                </div>
+            </div>
+        </div>
     </div>
 
 <script>
-    const canvas = document.getElementById('networkCanvas');
-    const ctx = canvas.getContext('2d');
-    let width, height, isMobile;
-    
-    const terms = [
-        "Facebook Ads", "Estrutura", "Copywriting", "VSL", "Tráfego", "Funil", "Data", "CPA", 
-        "ROI", "Scale", "Lead", "Pixel", "API", "Bot", "Offer", "Hook", 
-        "Growth", "Viral", "CRM", "Sales", "Target", "Benchmarking", "Criativos",
-        "Conceitos", "Analise", "Lógica", "Teste A/B", "Orçamento", "Campanha",
-        "Landing Page", "Retargeting", "Lookalike", "Conversão", "LTV", "Churn", "Upsell"
-    ];
+    // --- PWA SERVICE WORKER REGISTRATION ---
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('SW registrado', reg))
+                .catch(err => console.log('SW erro', err));
+        });
+    }
 
-    let nodes = [];
-    let centralNode;
-    let isEntering = false;
-
-    const config = {
-        nodeCount: 550, // Densidade alta para Desktop
-        connectionDist: 140, 
-        mouseDist: 200,
-        speed: 0.22 
+    // --- LÓGICA DE DADOS (LOCALSTORAGE) ---
+    const defaultData = {
+        config: { heroTitle: "Ecossistema SYS", heroImg: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=1920" },
+        modules: [
+            { title: "Agente Copy Black", img: "https://images.unsplash.com/photo-1553877522-43269d4ea984", video: "", personality: "Agressivo", manifesto: "Copy é guerra.", protocol: "Converter a qualquer custo.", threat_level: "red" },
+            { title: "Agente Analytics", img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71", video: "", personality: "Analítico", manifesto: "Dados não mentem.", protocol: "Otimizar ROI.", threat_level: "green" },
+            { title: "Agente VSL", img: "https://images.unsplash.com/photo-1536240478700-b869070f9279", video: "", personality: "Cinematográfico", manifesto: "Retenção é rei.", protocol: "Hook nos primeiros 3s.", threat_level: "yellow" }
+        ]
     };
 
-    function resize() {
-        width = canvas.width = window.innerWidth;
-        height = canvas.height = window.innerHeight;
-        isMobile = width < 768;
-        
-        // Ajustes Diferenciados
-        if (isMobile) {
-            config.nodeCount = 130;
-            config.connectionDist = 110;
-        } else {
-            config.nodeCount = 550;
-            config.connectionDist = 140;
-        }
+    let db = JSON.parse(localStorage.getItem('agentes_sys_v2')) || defaultData;
+    let currentIdx = 0;
 
-        centralNode = {
-            x: width / 2,
-            y: height / 2,
-            size: isMobile ? 6 : 3, // Bolinha central bem menor no Desktop
-            glow: 0
-        };
+    // --- REDE NEURAL (CANVAS OTIMIZADO) ---
+    const canvas = document.getElementById('networkCanvas');
+    const ctx = canvas.getContext('2d');
+    let width, height, nodes = [];
+    
+    function resizeCanvas() {
+        width = window.innerWidth; height = window.innerHeight;
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = width * dpr; canvas.height = height * dpr;
+        ctx.scale(dpr, dpr);
         initNodes();
     }
 
-    window.addEventListener('resize', resize);
-
-    // Clique no núcleo para transição
-    window.addEventListener('mousedown', e => {
-        if (isEntering) return;
-        const dx = e.clientX - centralNode.x;
-        const dy = e.clientY - centralNode.y;
-        if (Math.sqrt(dx*dx + dy*dy) < 60) {
-            isEntering = true;
-            document.getElementById('neural-layer').classList.add('system-entering');
-            setTimeout(() => { console.log("Redirecionando..."); }, 1200);
-        }
-    });
-
-    let mouse = { x: null, y: null };
-    window.addEventListener('mousemove', e => {
-        mouse.x = e.x;
-        mouse.y = e.y;
-    });
-
     class Node {
         constructor() {
-            this.x = Math.random() * width;
-            this.y = Math.random() * height;
-            this.vx = (Math.random() - 0.5) * config.speed;
-            this.vy = (Math.random() - 0.5) * config.speed;
-            this.z = Math.random(); 
-            
-            // Bolinhas maiores no Mobile, menores e densas no Desktop
-            this.size = isMobile ? (this.z * 3 + 2.5) : (this.z * 1.5 + 0.5);
-            
-            // Threshold: 0.82 no desktop (aparece muito mais nome)
-            const threshold = isMobile ? 0.94 : 0.82;
-            this.text = Math.random() > threshold ? terms[Math.floor(Math.random() * terms.length)] : null;
+            this.x = Math.random() * width; this.y = Math.random() * height;
+            this.vx = (Math.random() - 0.5) * 0.5; this.vy = (Math.random() - 0.5) * 0.5;
+            this.size = Math.random() * 2;
         }
-
         update() {
-            this.x += this.vx;
-            this.y += this.vy;
+            this.x += this.vx; this.y += this.vy;
             if (this.x < 0 || this.x > width) this.vx *= -1;
             if (this.y < 0 || this.y > height) this.vy *= -1;
-
-            if (mouse.x && !isEntering) {
-                let dx = mouse.x - this.x;
-                let dy = mouse.y - this.y;
-                let dist = Math.sqrt(dx*dx + dy*dy);
-                if (dist < config.mouseDist) {
-                    const force = (config.mouseDist - dist) / config.mouseDist;
-                    this.x -= (dx / dist) * force * 2;
-                    this.y -= (dy / dist) * force * 2;
-                }
-            }
         }
-
         draw() {
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(255, 255, 255, ${this.z * 0.5 + 0.2})`;
-            ctx.fill();
-
-            if (this.text) {
-                const fontSize = isMobile ? (this.z * 2 + 11) : (this.z * 5 + 10);
-                ctx.font = `bold ${Math.floor(fontSize)}px "JetBrains Mono"`;
-                ctx.fillStyle = `rgba(255, 255, 255, ${this.z * 0.4 + 0.3})`;
-                ctx.fillText(this.text.toUpperCase(), this.x + 10, this.y + 4);
-            }
+            ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+            ctx.fillStyle = "rgba(255,255,255,0.3)"; ctx.fill();
         }
     }
 
-    function drawCentralNode() {
-        // Brilho azul longo
-        centralNode.glow = Math.sin(Date.now() / 1000) * 30 + 40;
-        ctx.save();
-        ctx.shadowBlur = centralNode.glow;
-        ctx.shadowColor = "#3b82f6";
-        ctx.beginPath();
-        ctx.arc(centralNode.x, centralNode.y, centralNode.size, 0, Math.PI * 2);
-        ctx.fillStyle = "#3b82f6";
-        ctx.fill();
-        ctx.shadowBlur = 0;
-        ctx.font = `bold ${isMobile ? 18 : 22}px "JetBrains Mono"`;
-        ctx.fillStyle = "#ffffff";
-        ctx.textAlign = "center";
-        ctx.fillText(isEntering ? "SINCRONIZANDO..." : "agentes.sys", centralNode.x, centralNode.y - 25);
-        ctx.restore();
-    }
-
-    function initNodes() {
-        nodes = [];
-        for(let i=0; i<config.nodeCount; i++) nodes.push(new Node());
-    }
-
-    function animate() {
-        ctx.clearRect(0, 0, width, height);
-        for (let i = 0; i < nodes.length; i++) {
-            let node = nodes[i];
-            node.update();
-            node.draw();
-            for (let j = i + 1; j < nodes.length; j++) {
-                let dx = node.x - nodes[j].x;
-                let dy = node.y - nodes[j].y;
-                let dist = Math.sqrt(dx*dx + dy*dy);
-                if (dist < config.connectionDist) {
-                    ctx.beginPath();
-                    ctx.strokeStyle = `rgba(200, 210, 255, ${(1 - dist/config.connectionDist) * 0.15})`;
-                    ctx.moveTo(node.x, node.y);
-                    ctx.lineTo(nodes[j].x, nodes[j].y);
-                    ctx.stroke();
+    function initNodes() { nodes = Array.from({length: window.innerWidth < 768 ? 50 : 150}, () => new Node()); }
+    function animateNeural() {
+        ctx.clearRect(0,0,width,height);
+        nodes.forEach(node => {
+            node.update(); node.draw();
+            nodes.forEach(other => {
+                const dist = Math.hypot(node.x - other.x, node.y - other.y);
+                if(dist < 100) {
+                    ctx.beginPath(); ctx.moveTo(node.x, node.y); ctx.lineTo(other.x, other.y);
+                    ctx.strokeStyle = `rgba(59, 130, 246, ${1 - dist/100})`; ctx.stroke();
                 }
-            }
-            // Conexão com o centro
-            let dxC = node.x - centralNode.x;
-            let dyC = node.y - centralNode.y;
-            let distC = Math.sqrt(dxC*dxC + dyC*dyC);
-            if (distC < 250) {
-                ctx.beginPath();
-                ctx.strokeStyle = `rgba(59, 130, 246, ${(1 - distC/250) * 0.12})`;
-                ctx.moveTo(node.x, node.y);
-                ctx.lineTo(centralNode.x, centralNode.y);
-                ctx.stroke();
-            }
-        }
-        drawCentralNode();
-        requestAnimationFrame(animate);
+            });
+        });
+        requestAnimationFrame(animateNeural);
     }
 
-    resize();
-    animate();
+    // --- SISTEMA CORE ---
+    window.onload = () => {
+        resizeCanvas(); animateNeural();
+        // Boot animation
+        let w = 0;
+        const bar = document.getElementById('boot-bar');
+        const interval = setInterval(() => {
+            w += Math.random() * 5;
+            bar.style.width = Math.min(w, 100) + '%';
+            if(w >= 100) {
+                clearInterval(interval);
+                setTimeout(() => document.getElementById('boot-sequence').remove(), 500);
+            }
+        }, 50);
+    };
+
+    window.addEventListener('resize', resizeCanvas);
+
+    // Enter App
+    document.getElementById('neural-layer').addEventListener('click', () => {
+        document.getElementById('neural-layer').classList.add('background-mode');
+        document.getElementById('app-container').classList.add('active');
+        renderGrid();
+        lucide.createIcons();
+    });
+
+    // Navigation
+    function openMenu() { document.getElementById('sidebar').classList.add('open'); document.getElementById('overlay').classList.add('open'); }
+    function closeMenu() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
+    
+    function switchView(viewName) {
+        ['member', 'admin', 'lesson'].forEach(v => document.getElementById(`view-${v}`).classList.add('hidden'));
+        document.getElementById(`view-${viewName}`).classList.remove('hidden');
+        if(viewName === 'member') renderGrid();
+        if(viewName === 'admin') initAdmin();
+        closeMenu();
+    }
+
+    // Grid Renderer
+    function renderGrid() {
+        const grid = document.getElementById('grid-content');
+        document.getElementById('hero-bg').style.backgroundImage = `url('${db.config.heroImg}')`;
+        grid.innerHTML = db.modules.map((mod, i) => `
+            <div class="cine-card group" onclick="openLesson(${i})">
+                <img src="${mod.img}" class="card-img" loading="lazy">
+                <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-90"></div>
+                <div class="absolute bottom-4 left-4 z-20">
+                    <p class="text-[9px] text-zinc-400 uppercase font-bold tracking-widest mb-1">AGENTE ${String(i+1).padStart(2,'0')}</p>
+                    <h3 class="text-white font-bold italic leading-tight uppercase">${mod.title}</h3>
+                </div>
+                <div class="absolute top-3 right-3 w-2 h-2 rounded-full ${mod.threat_level === 'red' ? 'bg-red-500' : mod.threat_level === 'yellow' ? 'bg-yellow-500' : 'bg-green-500'} shadow-[0_0_10px_currentColor]"></div>
+            </div>
+        `).join('');
+    }
+
+    // Lesson Logic
+    window.openLesson = (i) => {
+        currentIdx = i;
+        const mod = db.modules[i];
+        document.getElementById('lesson-title').innerText = mod.title;
+        document.getElementById('lesson-manifesto').innerText = mod.manifesto;
+        document.getElementById('lesson-protocol').innerText = mod.protocol;
+        
+        // Simular Prompt Mestre
+        document.getElementById('lesson-master-prompt').textContent = `ACT AS: ${mod.title}\nMISSION: ${mod.manifesto}\nPROTOCOL: ${mod.protocol}\n\n// EXECUTE SINGULARITY.SYS`;
+        
+        // Placeholder Video (simulado com div animada)
+        const vidContainer = document.getElementById('video-container');
+        vidContainer.innerHTML = `<div class="w-full h-full bg-zinc-900 flex items-center justify-center text-zinc-600 font-mono text-xs animate-pulse">NEURAL LINK ESTABLISHED...</div>`;
+        
+        switchView('lesson');
+    };
+
+    window.closeLesson = () => switchView('member');
+    window.switchTab = (tab) => {
+        document.getElementById('tab-manifesto').classList.toggle('hidden', tab !== 'manifesto');
+        document.getElementById('tab-prompt').classList.toggle('hidden', tab !== 'prompt');
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+    };
+
+    window.copyPrompt = () => {
+        navigator.clipboard.writeText(document.getElementById('lesson-master-prompt').textContent);
+        alert('Prompt copiado para a área de transferência.');
+    };
+
+    // Admin Logic
+    function initAdmin() {
+        const sel = document.getElementById('admin-module-select');
+        sel.innerHTML = db.modules.map((m, i) => `<option value="${i}">${m.title}</option>`).join('');
+        loadAdminModule();
+    }
+    window.loadAdminModule = () => {
+        const i = document.getElementById('admin-module-select').value;
+        const mod = db.modules[i];
+        document.getElementById('admin-title-input').value = mod.title;
+        document.getElementById('admin-manifesto-input').value = mod.manifesto;
+    };
+    window.saveAdminModule = () => {
+        const i = document.getElementById('admin-module-select').value;
+        db.modules[i].title = document.getElementById('admin-title-input').value;
+        db.modules[i].manifesto = document.getElementById('admin-manifesto-input').value;
+        localStorage.setItem('agentes_sys_v2', JSON.stringify(db));
+        alert('Dados sincronizados.');
+    };
+    window.createNewAgent = () => {
+        db.modules.push({ title: "Novo Agente", img: "https://via.placeholder.com/400x600/111/fff", video: "", personality: "", manifesto: "Nova diretriz.", protocol: "", threat_level: "green" });
+        localStorage.setItem('agentes_sys_v2', JSON.stringify(db));
+        initAdmin();
+        document.getElementById('admin-module-select').value = db.modules.length - 1;
+        loadAdminModule();
+    };
+
+    // Initial render call if needed (handled by click)
 </script>
 </body>
 </html>
