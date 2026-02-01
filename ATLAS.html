@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AtlasFlow Enterprise</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            850: '#1e293b', // Custom dark helper
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.4s ease-out forwards',
+                        'fade-in-up': 'fadeInUp 0.5s ease-out forwards',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Charts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+    <style>
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; }
+        
+        /* Glassmorphism Utilities */
+        .glass {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        
+        /* Checkbox Custom Style */
+        .task-checkbox:checked + div {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+        .task-checkbox:checked + div svg {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-[#0f172a] dark:text-slate-100 transition-colors duration-500 font-sans selection:bg-blue-500 selection:text-white min-h-screen">
+
+    <!-- DESKTOP SIDEBAR -->
+    <aside class="hidden lg:flex fixed left-0 top-0 h-full w-64 flex-col border-r border-slate-200 dark:border-slate-800/50 bg-slate-50 dark:bg-[#0f172a] p-6 z-50">
+        <div class="flex items-center gap-3 mb-10">
+            <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-600/20">A</div>
+            <h1 class="text-xl font-bold tracking-tight">AtlasFlow</h1>
+        </div>
+        <nav class="space-y-2 flex-1">
+            <button onclick="switchTab('dashboard')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all bg-blue-600 text-white shadow-lg shadow-blue-600/20" data-target="dashboard">
+                <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                <span class="font-medium">Visão Geral</span>
+            </button>
+            <button onclick="switchTab('finance')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800/50" data-target="finance">
+                <i data-lucide="wallet" class="w-5 h-5"></i>
+                <span class="font-medium">Financeiro</span>
+            </button>
+            <button onclick="switchTab('notes')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800/50" data-target="notes">
+                <i data-lucide="notebook" class="w-5 h-5"></i>
+                <span class="font-medium">Caderno</span>
+            </button>
+            <button onclick="switchTab('atlas')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800/50" data-target="atlas">
+                <i data-lucide="brain-circuit" class="w-5 h-5"></i>
+                <span class="font-medium">Atlas AI</span>
+            </button>
+        </nav>
+        <div class="pt-6 border-t border-slate-200 dark:border-slate-800">
+            <button onclick="toggleTheme()" class="flex items-center gap-3 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">
+                <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
+                <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
+                <span id="theme-text">Modo Claro</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="lg:pl-64 min-h-screen">
+        <div class="max-w-3xl mx-auto p-4 md:p-8 pt-6">
+            
+            <!-- HEADER (Mobile Only) -->
+            <div class="flex justify-between items-center mb-6 lg:hidden">
+                <div>
+                    <h1 class="text-2xl font-bold">Olá, Alexandre</h1>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Vamos dominar o dia.</p>
+                </div>
+                <button onclick="toggleTheme()" class="p-3 rounded-full bg-white shadow-sm dark:bg-slate-800 text-slate-600 dark:text-yellow-400 transition-colors">
+                    <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
+                    <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
+                </button>
+            </div>
+
+            <!-- VIEW: DASHBOARD -->
+            <div id="view-dashboard" class="view-section animate-fade-in block">
+                <!-- Header Desktop -->
+                <div class="hidden lg:flex justify-between items-center mb-6">
+                    <div>
+                        <h1 class="text-2xl font-bold">Olá, Alexandre</h1>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Vamos dominar o dia.</p>
+                    </div>
+                    <button onclick="toggleTheme()" class="p-3 rounded-full bg-white shadow-sm dark:bg-slate-800 text-slate-600 dark:text-yellow-400 transition-colors">
+                        <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
+                        <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Radar Chart -->
+                    <div class="col-span-1 lg:col-span-2 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800/80 relative overflow-hidden shadow-sm">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-bold flex items-center gap-2">
+                                <i data-lucide="brain-circuit" class="w-4 h-4 text-blue-500"></i>
+                                Visão Geral (Life OS)
+                            </h2>
+                            <span class="bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-bold">Score: 82</span>
+                        </div>
+                        <div id="radarChart" class="w-full h-[250px] flex items-center justify-center"></div>
+                    </div>
+
+                    <!-- Checklist -->
+                    <div class="p-6 rounded-3xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800/80 shadow-sm">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-bold">Resumo do Dia</h2>
+                            <span class="text-xs text-slate-500 dark:text-slate-400">4 de 6</span>
+                        </div>
+                        <div class="space-y-2 overflow-y-auto max-h-[250px] pr-1 custom-scrollbar">
+                            <!-- Task Items -->
+                            <label class="flex items-center p-3 rounded-xl border border-slate-100 hover:border-slate-200 dark:border-slate-700 dark:hover:bg-slate-800 bg-white dark:bg-slate-800/40 cursor-pointer transition-all group">
+                                <input type="checkbox" class="task-checkbox hidden">
+                                <div class="w-5 h-5 rounded-md border border-slate-300 dark:border-slate-600 flex items-center justify-center mr-3 transition-colors">
+                                    <i data-lucide="check" class="w-3 h-3 text-white hidden"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium group-hover:text-blue-500 transition-colors">Treino de Hipertrofia</p>
+                                </div>
+                                <span class="text-xs text-slate-400 dark:text-slate-500">06:00</span>
+                            </label>
+                            
+                            <label class="flex items-center p-3 rounded-xl border border-slate-100 hover:border-slate-200 dark:border-slate-700 dark:hover:bg-slate-800 bg-white dark:bg-slate-800/40 cursor-pointer transition-all group">
+                                <input type="checkbox" class="task-checkbox hidden">
+                                <div class="w-5 h-5 rounded-md border border-slate-300 dark:border-slate-600 flex items-center justify-center mr-3 transition-colors">
+                                    <i data-lucide="check" class="w-3 h-3 text-white hidden"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium group-hover:text-blue-500 transition-colors">Beber 3L de água</p>
+                                </div>
+                            </label>
+
+                            <label class="flex items-center p-3 rounded-xl border border-slate-100 hover:border-slate-200 dark:border-slate-700 dark:hover:bg-slate-800 bg-white dark:bg-slate-800/40 cursor-pointer transition-all group">
+                                <input type="checkbox" class="task-checkbox hidden">
+                                <div class="w-5 h-5 rounded-md border border-slate-300 dark:border-slate-600 flex items-center justify-center mr-3 transition-colors">
+                                    <i data-lucide="check" class="w-3 h-3 text-white hidden"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium group-hover:text-blue-500 transition-colors">Ler 20 pág (Deep Work)</p>
+                                </div>
+                                <span class="text-xs text-slate-400 dark:text-slate-500">08:00</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Metrics Row -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                    <div class="p-5 rounded-2xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800/50 backdrop-blur-sm animate-fade-in-up" style="animation-delay: 100ms;">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-2 rounded-lg bg-blue-50 text-blue-600 dark:bg-slate-700 dark:text-blue-400">
+                                <i data-lucide="check-square" class="w-5 h-5"></i>
+                            </div>
+                            <span class="flex items-center text-xs font-bold px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-500">
+                                <i data-lucide="arrow-up-right" class="w-3 h-3 mr-1"></i> 12%
+                            </span>
+                        </div>
+                        <h3 class="text-2xl font-bold tracking-tight">8h 20m</h3>
+                        <p class="text-xs mt-1 font-medium text-slate-500 dark:text-slate-400">Produtividade</p>
+                    </div>
+
+                    <div class="p-5 rounded-2xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800/50 backdrop-blur-sm animate-fade-in-up" style="animation-delay: 200ms;">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-2 rounded-lg bg-blue-50 text-blue-600 dark:bg-slate-700 dark:text-blue-400">
+                                <i data-lucide="wallet" class="w-5 h-5"></i>
+                            </div>
+                            <span class="flex items-center text-xs font-bold px-2 py-1 rounded-full bg-red-500/10 text-red-500">
+                                <i data-lucide="arrow-down-right" class="w-3 h-3 mr-1"></i> 5%
+                            </span>
+                        </div>
+                        <h3 class="text-2xl font-bold tracking-tight">R$ 145</h3>
+                        <p class="text-xs mt-1 font-medium text-slate-500 dark:text-slate-400">Gastos Hoje</p>
+                    </div>
+
+                    <div class="p-5 rounded-2xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800/50 backdrop-blur-sm animate-fade-in-up" style="animation-delay: 300ms;">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-2 rounded-lg bg-blue-50 text-blue-600 dark:bg-slate-700 dark:text-blue-400">
+                                <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-2xl font-bold tracking-tight">68%</h3>
+                        <p class="text-xs mt-1 font-medium text-slate-500 dark:text-slate-400">Metas do Mês</p>
+                    </div>
+
+                    <div class="p-5 rounded-2xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800/50 backdrop-blur-sm animate-fade-in-up" style="animation-delay: 400ms;">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-2 rounded-lg bg-blue-50 text-blue-600 dark:bg-slate-700 dark:text-blue-400">
+                                <i data-lucide="notebook" class="w-5 h-5"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-2xl font-bold tracking-tight">3</h3>
+                        <p class="text-xs mt-1 font-medium text-slate-500 dark:text-slate-400">Novas Notas</p>
+                    </div>
+                </div>
+
+                <!-- Weekly Chart -->
+                <div class="mt-6 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800/80 shadow-sm">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-lg font-bold">Performance Semanal</h2>
+                    </div>
+                    <div id="areaChart" class="w-full h-[200px]"></div>
+                </div>
+                
+                <!-- Spacer for mobile dock -->
+                <div class="h-24 lg:h-6"></div>
+            </div>
+
+            <!-- VIEW: FINANCE -->
+            <div id="view-finance" class="view-section animate-fade-in hidden">
+                <div class="flex justify-between items-end mb-4">
+                    <h1 class="text-2xl font-bold">Carteira</h1>
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-xl transition-colors">
+                        <i data-lucide="plus" class="w-6 h-6"></i>
+                    </button>
+                </div>
+
+                <!-- 3D Card -->
+                <div class="relative w-full h-48 rounded-2xl p-6 overflow-hidden transition-all duration-500 transform hover:scale-[1.02] shadow-2xl bg-gradient-to-br from-blue-600 to-blue-400 dark:from-blue-900 dark:to-slate-900 mb-6">
+                    <div class="absolute top-0 right-0 -mr-10 -mt-10 w-40 h-40 bg-white opacity-10 rounded-full blur-2xl"></div>
+                    <div class="absolute bottom-0 left-0 -ml-10 -mb-10 w-40 h-40 bg-blue-400 opacity-20 rounded-full blur-3xl"></div>
+                    <div class="relative z-10 flex flex-col justify-between h-full text-white">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-xs font-medium opacity-80 tracking-wider">SALDO TOTAL</p>
+                                <h2 class="text-3xl font-bold mt-1 tracking-tight">R$ 48.250,90</h2>
+                            </div>
+                            <div class="w-12 h-8 bg-white/20 rounded-md backdrop-blur-md border border-white/30 flex items-center justify-center">
+                                <div class="w-6 h-4 border border-white/60 rounded-sm flex gap-[2px] items-center justify-center">
+                                    <div class="w-[1px] h-full bg-white/60"></div>
+                                    <div class="w-[1px] h-full bg-white/60"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-end">
+                            <div>
+                                <p class="text-xs opacity-70 mb-1">TITULAR</p>
+                                <p class="font-semibold tracking-wide">ALEXANDRE SILVA</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs opacity-70">VALIDADE</p>
+                                <p class="font-mono">12/28</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="p-4 rounded-2xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800/50 flex flex-col items-center justify-center gap-2">
+                        <div class="p-2 bg-emerald-500/10 rounded-full text-emerald-500"><i data-lucide="arrow-up-right" class="w-5 h-5"></i></div>
+                        <span class="text-xs opacity-60">Entradas</span>
+                        <span class="font-bold">R$ 12.450</span>
+                    </div>
+                    <div class="p-4 rounded-2xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800/50 flex flex-col items-center justify-center gap-2">
+                        <div class="p-2 bg-red-500/10 rounded-full text-red-500"><i data-lucide="arrow-down-right" class="w-5 h-5"></i></div>
+                        <span class="text-xs opacity-60">Saídas</span>
+                        <span class="font-bold">R$ 3.210</span>
+                    </div>
+                </div>
+
+                <div class="p-6 rounded-3xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800/80 mb-6">
+                    <h2 class="text-lg font-bold mb-4">Fluxo de Caixa</h2>
+                    <div id="barChart" class="w-full h-[200px]"></div>
+                </div>
+
+                <div class="space-y-3 pb-24">
+                    <h2 class="text-lg font-bold">Últimas Transações</h2>
+                    <div class="flex justify-between items-center p-4 rounded-xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800/40">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center bg-slate-200/50 dark:bg-slate-700/50 text-slate-500"><i data-lucide="wallet" class="w-4 h-4"></i></div>
+                            <div>
+                                <p class="font-semibold text-sm">Spotify Premium</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Assinatura • Hoje</p>
+                            </div>
+                        </div>
+                        <span class="font-mono text-sm font-bold text-slate-800 dark:text-white">- R$ 21,90</span>
+                    </div>
+                    <div class="flex justify-between items-center p-4 rounded-xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800/40">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center bg-emerald-500/10 text-emerald-500"><i data-lucide="arrow-up-right" class="w-4 h-4"></i></div>
+                            <div>
+                                <p class="font-semibold text-sm">Venda Hotmart #492</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Infoproduto • Hoje</p>
+                            </div>
+                        </div>
+                        <span class="font-mono text-sm font-bold text-emerald-500">+ R$ 297,00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: NOTES -->
+            <div id="view-notes" class="view-section animate-fade-in hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-2xl font-bold">Caderno</h1>
+                    <div class="flex gap-2">
+                        <button class="p-2 rounded-full bg-white dark:bg-slate-800 text-slate-600 dark:text-white border border-slate-200 dark:border-slate-700"><i data-lucide="search" class="w-5 h-5"></i></button>
+                        <button class="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg shadow-blue-600/20">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Nova Nota
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 overflow-x-auto pb-2 custom-scrollbar mb-4">
+                    <button class="whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-blue-600 text-white">Tudo <span class="opacity-60 ml-1 text-xs">12</span></button>
+                    <button class="whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">Financeiro <span class="opacity-60 ml-1 text-xs">4</span></button>
+                    <button class="whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">Insights <span class="opacity-60 ml-1 text-xs">8</span></button>
+                    <button class="whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">Infoprodutos <span class="opacity-60 ml-1 text-xs">3</span></button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 pb-24">
+                    <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex flex-col justify-between h-44 hover:scale-[1.02] transition-transform duration-200 cursor-pointer hover:border-blue-400 dark:hover:border-blue-500/50">
+                        <div>
+                            <div class="mb-2">
+                                <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md bg-blue-50 text-blue-600 dark:bg-slate-700 dark:text-blue-400">Infoprodutos</span>
+                            </div>
+                            <h3 class="font-bold leading-tight mb-2 line-clamp-2">Estratégia Lançamento Q3</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-3">Focar no tráfego pago para leads frios e usar o Atlas para copy...</p>
+                        </div>
+                        <div class="text-[10px] text-slate-400 dark:text-slate-500 flex justify-between items-center mt-2">
+                            <span>Hoje, 10:23</span>
+                            <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex flex-col justify-between h-44 hover:scale-[1.02] transition-transform duration-200 cursor-pointer hover:border-blue-400 dark:hover:border-blue-500/50">
+                        <div>
+                            <div class="mb-2">
+                                <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md bg-blue-50 text-blue-600 dark:bg-slate-700 dark:text-blue-400">Financeiro</span>
+                            </div>
+                            <h3 class="font-bold leading-tight mb-2 line-clamp-2">Resumo Reunião Sócios</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-3">Metas batidas, precisamos rever o CAC do produto principal.</p>
+                        </div>
+                        <div class="text-[10px] text-slate-400 dark:text-slate-500 flex justify-between items-center mt-2">
+                            <span>Ontem</span>
+                            <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: ATLAS AI -->
+            <div id="view-atlas" class="view-section animate-fade-in hidden relative h-[80vh] flex flex-col">
+                <div class="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-blue-600/20 to-transparent pointer-events-none z-0"></div>
+                <div class="flex-1 flex flex-col justify-center items-center z-10 p-8 text-center space-y-6">
+                    <div class="w-24 h-24 rounded-full bg-gradient-to-tr from-blue-500 to-cyan-400 flex items-center justify-center shadow-xl shadow-blue-500/30 animate-pulse-slow">
+                        <i data-lucide="brain-circuit" class="w-12 h-12 text-white"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-3xl font-bold mb-2">Atlas AI</h2>
+                        <p class="text-slate-500 dark:text-slate-400">Seu segundo cérebro para gestão e estratégia.</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-md">
+                        <button class="p-3 text-sm rounded-xl border border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-left transition-colors">Resumo financeiro</button>
+                        <button class="p-3 text-sm rounded-xl border border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-left transition-colors">Criar nova meta</button>
+                        <button class="p-3 text-sm rounded-xl border border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-left transition-colors">Analisar disciplina</button>
+                        <button class="p-3 text-sm rounded-xl border border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-left transition-colors">Ideia de post</button>
+                    </div>
+                </div>
+                <div class="p-4 rounded-t-3xl border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+                    <div class="flex items-center gap-3 p-3 rounded-2xl bg-slate-100 dark:bg-slate-900">
+                        <button class="p-2 rounded-full text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800"><i data-lucide="plus" class="w-5 h-5"></i></button>
+                        <input type="text" placeholder="Pergunte algo ao Atlas..." class="flex-1 bg-transparent outline-none text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500">
+                        <button class="p-2 rounded-full bg-blue-600 text-white shadow-lg shadow-blue-600/30"><i data-lucide="mic" class="w-4 h-4"></i></button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- MOBILE BOTTOM NAVIGATION (DOCK) -->
+    <div class="lg:hidden fixed bottom-0 left-0 right-0 z-50 pointer-events-none">
+        <div class="mx-4 mb-4 rounded-2xl border border-white/50 dark:border-slate-700/50 backdrop-blur-xl shadow-2xl transition-all duration-300 bg-white/90 dark:bg-slate-900/90 pointer-events-auto">
+            <div class="flex justify-around items-center h-16 px-2">
+                <button onclick="switchTab('dashboard')" class="nav-btn-mobile flex flex-col items-center justify-center w-full py-1 text-blue-500" data-target="dashboard">
+                    <div class="mb-1"><i data-lucide="layout-dashboard" class="w-6 h-6"></i></div>
+                    <span class="text-[10px] font-medium">Home</span>
+                </button>
+                <button onclick="switchTab('notes')" class="nav-btn-mobile flex flex-col items-center justify-center w-full py-1 text-slate-400 dark:text-slate-500" data-target="notes">
+                    <div class="mb-1"><i data-lucide="notebook" class="w-6 h-6"></i></div>
+                    <span class="text-[10px] font-medium hidden">Notas</span>
+                </button>
+                <div class="relative -top-6">
+                    <button onclick="switchTab('atlas')" class="w-14 h-14 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500 text-white flex items-center justify-center shadow-lg shadow-blue-500/40 border-4 border-slate-50 dark:border-[#0f172a] transform active:scale-95 transition-transform">
+                        <i data-lucide="brain-circuit" class="w-6 h-6"></i>
+                    </button>
+                </div>
+                <button onclick="switchTab('finance')" class="nav-btn-mobile flex flex-col items-center justify-center w-full py-1 text-slate-400 dark:text-slate-500" data-target="finance">
+                    <div class="mb-1"><i data-lucide="wallet" class="w-6 h-6"></i></div>
+                    <span class="text-[10px] font-medium hidden">Carteira</span>
+                </button>
+                <button class="nav-btn-mobile flex flex-col items-center justify-center w-full py-1 text-slate-400 dark:text-slate-500">
+                    <div class="mb-1"><i data-lucide="menu" class="w-6 h-6"></i></div>
+                    <span class="text-[10px] font-medium hidden">Menu</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // 1. Initialize Icons
+        lucide.createIcons();
+
+        // 2. Charts Configuration (ApexCharts replicating Recharts look)
+        const commonOptions = {
+            chart: { background: 'transparent', toolbar: { show: false } },
+            theme: { mode: 'dark' } 
+        };
+
+        // Radar Chart
+        const radarOptions = {
+            ...commonOptions,
+            series: [{ name: 'Alexandre', data: [85, 61, 90, 54, 78, 70] }],
+            chart: { height: 250, type: 'radar', toolbar: { show: false }, background: 'transparent' },
+            labels: ['Disciplina', 'Financeiro', 'Intelecto', 'Físico', 'Mental', 'Produtividade'],
+            stroke: { width: 3, colors: ['#3b82f6'] },
+            fill: { opacity: 0.4, colors: ['#3b82f6'] },
+            markers: { size: 0 },
+            yaxis: { show: false, max: 100 },
+            xaxis: {
+                labels: {
+                    style: { colors: ['#94a3b8', '#94a3b8', '#94a3b8', '#94a3b8', '#94a3b8', '#94a3b8'], fontSize: '11px', fontFamily: 'sans-serif' }
+                }
+            },
+            plotOptions: { radar: { polygons: { strokeColors: '#334155', connectorColors: '#334155' } } }
+        };
+
+        // Area Chart (Weekly)
+        const areaOptions = {
+            series: [{ name: 'Tarefas', data: [12, 19, 15, 22, 18, 10, 8] }],
+            chart: { type: 'area', height: 200, toolbar: { show: false }, background: 'transparent' },
+            stroke: { curve: 'smooth', width: 3, colors: ['#3b82f6'] },
+            fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.3, opacityTo: 0.05, stops: [0, 90, 100] }, colors: ['#3b82f6'] },
+            dataLabels: { enabled: false },
+            grid: { borderColor: '#334155', strokeDashArray: 3, xaxis: { lines: { show: false } } },
+            xaxis: { categories: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'], labels: { style: { colors: '#94a3b8' } }, axisBorder: { show: false }, axisTicks: { show: false } },
+            yaxis: { labels: { style: { colors: '#94a3b8' } } }
+        };
+
+        // Bar Chart (Finance)
+        const barOptions = {
+            series: [{ name: 'Entradas', data: [4000, 3000, 2000, 2780, 1890, 2390, 3490] }, { name: 'Saídas', data: [2400, 1398, 9800, 3908, 4800, 3800, 4300] }],
+            chart: { type: 'bar', height: 200, toolbar: { show: false }, background: 'transparent', stacked: false },
+            colors: ['#10b981', '#ef4444'],
+            plotOptions: { bar: { horizontal: false, columnWidth: '55%', borderRadius: 4 } },
+            dataLabels: { enabled: false },
+            legend: { show: false },
+            grid: { borderColor: '#334155', strokeDashArray: 3, xaxis: { lines: { show: false } } },
+            xaxis: { categories: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul'], labels: { style: { colors: '#94a3b8' } }, axisBorder: { show: false }, axisTicks: { show: false } },
+            yaxis: { show: false }
+        };
+
+        // Render Charts
+        const radarChart = new ApexCharts(document.querySelector("#radarChart"), radarOptions);
+        const areaChart = new ApexCharts(document.querySelector("#areaChart"), areaOptions);
+        const barChart = new ApexCharts(document.querySelector("#barChart"), barOptions);
+        
+        radarChart.render();
+        areaChart.render();
+        barChart.render();
+
+        // 3. Logic for Tabs and Theme
+        function switchTab(tabId) {
+            // Hide all views
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('block'));
+            
+            // Show selected view
+            const selected = document.getElementById(`view-${tabId}`);
+            selected.classList.remove('hidden');
+            selected.classList.add('block');
+            
+            // Re-render charts if hidden (fix 0 width bug in some browsers)
+            if(tabId === 'dashboard') { radarChart.updateOptions({}); areaChart.updateOptions({}); }
+            if(tabId === 'finance') { barChart.updateOptions({}); }
+
+            // Update Desktop Sidebar UI
+            document.querySelectorAll('.nav-item').forEach(el => {
+                if(el.getAttribute('data-target') === tabId) {
+                    el.className = "nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all bg-blue-600 text-white shadow-lg shadow-blue-600/20";
+                } else {
+                    el.className = "nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800/50";
+                }
+            });
+
+            // Update Mobile Dock UI
+            document.querySelectorAll('.nav-btn-mobile').forEach(el => {
+                const icon = el.querySelector('div');
+                const text = el.querySelector('span');
+                if(el.getAttribute('data-target') === tabId) {
+                    el.classList.remove('text-slate-400', 'dark:text-slate-500');
+                    el.classList.add('text-blue-500');
+                    icon.classList.add('-translate-y-1');
+                    text.classList.remove('hidden');
+                    // Add dot indicator simulation
+                } else {
+                    el.classList.add('text-slate-400', 'dark:text-slate-500');
+                    el.classList.remove('text-blue-500');
+                    icon.classList.remove('-translate-y-1');
+                    text.classList.add('hidden');
+                }
+            });
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.classList.toggle('dark');
+            const themeText = document.getElementById('theme-text');
+            
+            if(themeText) themeText.innerText = isDark ? 'Modo Claro' : 'Modo Escuro';
+            
+            // Update Chart Colors for Light Mode
+            const textColor = isDark ? '#94a3b8' : '#475569';
+            const gridColor = isDark ? '#334155' : '#e2e8f0';
+            
+            const updateOpts = {
+                xaxis: { labels: { style: { colors: textColor } } },
+                yaxis: { labels: { style: { colors: textColor } } },
+                grid: { borderColor: gridColor },
+                plotOptions: { radar: { polygons: { strokeColors: gridColor, connectorColors: gridColor } } }
+            };
+
+            radarChart.updateOptions(updateOpts);
+            areaChart.updateOptions(updateOpts);
+            barChart.updateOptions(updateOpts);
+        }
+    </script>
+</body>
+</html>
