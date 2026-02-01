@@ -2,8 +2,14 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>agentes.sys | Neural Gateway</title>
+    
+    <meta name="theme-color" content="#0a0a0a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1698/1698535.png">
     
     <meta name="black-singularity" content="activated">
     
@@ -23,6 +29,8 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             text-rendering: optimizeLegibility;
+            /* Previne comportamento de elástico no iOS PWA */
+            overscroll-behavior: none;
         }
 
         /* === ESTILOS DO CÓDIGO 1 (Neural Layer - Intro) === */
@@ -210,7 +218,7 @@
         <div class="hover-trigger" onmouseenter="openMenu()"></div>
         <div id="overlay" class="menu-overlay" onclick="closeMenu()"></div>
 
-        <aside id="sidebar" class="sidebar-menu flex flex-col p-8" onmouseleave="closeMenu()">
+        <aside id="sidebar" class="sidebar-menu flex flex-col p-8 safe-top safe-bottom" onmouseleave="closeMenu()">
             <div class="mb-10 flex items-center gap-3 border-b border-white/10 pb-6">
                 <div id="side-logo" class="w-10 h-10 bg-white text-black font-bold flex items-center justify-center rounded text-sm tracking-tighter">Ω</div>
                 <div>
@@ -235,7 +243,7 @@
         </aside>
 
         <div id="view-member" class="transition-opacity duration-500">
-            <section id="main-hero" class="hero-section" style="background-image: url('https://images.unsplash./photo-1626814026160-2237a95fc5a0?q=80&w=1920&auto=format&fit=crop');">
+            <section id="main-hero" class="hero-section" style="background-image: url('https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=1920&auto=format&fit=crop');">
                 <div class="hero-fade-bottom"></div>
                 
                 <div class="absolute bottom-20 left-12 reveal z-20"> 
@@ -244,14 +252,14 @@
                 </div>
             </section>
 
-            <section class="max-w-[1600px] mx-auto px-6 py-20 relative z-20">
+            <section class="max-w-[1600px] mx-auto px-6 py-20 relative z-20 safe-bottom">
                 <div id="grid-content" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6"></div>
                 <div class="h-40"></div>
             </section>
         </div>
 
         <div id="view-lesson" class="fixed inset-0 bg-[#0a0a0a]/95 backdrop-blur-md z-[80] hidden overflow-y-auto scroll-mobile">
-            <div class="h-20 border-b border-white/10 flex items-center px-6 sticky top-0 bg-black/90 backdrop-blur z-50 justify-between">
+            <div class="h-20 border-b border-white/10 flex items-center px-6 sticky top-0 bg-black/90 backdrop-blur z-50 justify-between safe-top">
                 <button onclick="closeLesson()" class="flex items-center gap-2 text-zinc-400 hover:text-white transition uppercase tracking-widest text-[10px] font-bold">
                     <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar ao Centro
                 </button>
@@ -260,7 +268,7 @@
                 </div>
             </div>
 
-            <div class="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-12 mt-4">
+            <div class="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-12 mt-4 safe-bottom">
                 <div class="lg:col-span-2 space-y-8">
                     <div class="aspect-video w-full bg-black rounded-3xl border border-white/10 relative overflow-hidden group shadow-2xl ring-1 ring-white/10">
                         <div id="video-container" class="w-full h-full rounded-3xl overflow-hidden"></div>
@@ -328,7 +336,7 @@
             </div>
         </div>
 
-        <div id="view-admin" class="hidden bg-black min-h-screen p-12">
+        <div id="view-admin" class="hidden bg-black min-h-screen p-12 safe-top safe-bottom">
             <header class="flex justify-between items-center mb-12 border-b border-white/10 pb-8">
                 <div>
                     <h2 class="text-4xl font-black italic tracking-tighter uppercase">agentes.sys — Núcleo de Singularidade</h2>
@@ -420,6 +428,21 @@
     </div>
 
 <script>
+    // ============================================
+    // REGISTRO DO PWA SERVICE WORKER
+    // ============================================
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(registration => {
+                    console.log('SW registrado com sucesso:', registration.scope);
+                })
+                .catch(error => {
+                    console.log('Falha ao registrar SW:', error);
+                });
+        });
+    }
+
     // ============================================
     // PARTE 1: SCRIPT DA REDE NEURAL (Intro)
     // ============================================
@@ -730,7 +753,7 @@
         db = JSON.parse(localStorage.getItem('agentes_sys_singularity')) || {
             config: {
                 heroTitle: "Ecossistema SYS",
-                heroImg: "https://images.unsplash./photo-1626814026160-2237a95fc5a0?q=80&w=1920"
+                heroImg: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=1920"
             },
             modules: generateInitialAgents()
         };
