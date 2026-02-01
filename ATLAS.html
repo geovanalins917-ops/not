@@ -1,62 +1,154 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="dark">
+<html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AtlasFlow Enterprise</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+    <title>agentes.sys | Neural Gateway</title>
     
-    <!-- Tailwind CSS -->
+    <meta name="black-singularity" content="activated">
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        slate: {
-                            850: '#1e293b', // Custom dark helper
-                        }
-                    },
-                    animation: {
-                        'fade-in': 'fadeIn 0.4s ease-out forwards',
-                        'fade-in-up': 'fadeInUp 0.5s ease-out forwards',
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                    },
-                    keyframes: {
-                        fadeIn: {
-                            '0%': { opacity: '0', transform: 'translateY(10px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        },
-                        fadeInUp: {
-                            '0%': { opacity: '0', transform: 'translateY(20px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-
-    <!-- Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <!-- Charts -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;600;800&display=swap" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
     <style>
-        /* Custom Scrollbar */
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; }
-        
-        /* Glassmorphism Utilities */
-        .glass {
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+        /* === ESTILOS GERAIS (Fusão) === */
+        body { 
+            background: #0a0a0a; 
+            font-family: 'Inter Tight', sans-serif; 
+            color: white; 
+            margin: 0; 
+            overflow: hidden; 
+        }
+
+        /* === ESTILOS DO CÓDIGO 1 (Neural Layer) === */
+        #neural-layer {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: radial-gradient(circle at center, #111115 0%, #08080a 100%);
+            z-index: 20000; /* Inicialmente no topo */
+            transition: opacity 1s ease;
+            cursor: pointer;
+        }
+
+        #neural-layer.background-mode {
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        canvas { display: block; }
+
+        .hint-text {
+            position: absolute;
+            bottom: 40px; left: 50%;
+            transform: translateX(-50%);
+            color: #3b82f6;
+            font-size: 10px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            pointer-events: none;
+            text-transform: uppercase;
+            font-family: 'JetBrains Mono', monospace;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse { 
+            0%, 100% { opacity: 0.3; transform: translateX(-50%) scale(1); } 
+            50% { opacity: 0.8; transform: translateX(-50%) scale(1.05); } 
+        }
+
+        /* === ESTILOS DO CÓDIGO 2 (Sistema Principal) === */
+        #app-container {
+            display: none; 
+            opacity: 0;
+            transition: opacity 1.5s ease;
+            position: relative;
+            z-index: 10;
         }
         
-        /* Checkbox Custom Style */
+        #app-container.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .cine-card { background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); }
+        .hero-section { background-color: transparent; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+        .hover-trigger { position: fixed; top: 0; left: 0; width: 20px; height: 100vh; z-index: 9999; cursor: pointer; }
+        .sidebar-menu { position: fixed; top: 0; left: 0; height: 100vh; width: 280px; background: rgba(10, 10, 10, 0.98); border-right: 1px solid rgba(255,255,255,0.08); z-index: 10000; transform: translateX(-100%); transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1); box-shadow: 10px 0 50px rgba(0,0,0,0.5); }
+        .sidebar-menu.open { transform: translateX(0); }
+        .menu-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9000; opacity: 0; pointer-events: none; transition: opacity 0.5s; }
+        .menu-overlay.open { opacity: 1; pointer-events: auto; }
+
+        .hero-section { height: 100vh; width: 100%; background-size: cover; background-position: center; position: relative; z-index: 10; }
+        .hero-fade-bottom { position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; background: linear-gradient(to bottom, transparent 0%, #0a0a0a 100%); }
+
+        .cine-card { position: relative; aspect-ratio: 2/3; border-radius: 12px; overflow: hidden; cursor: pointer; border: 1px solid rgba(255, 255, 255, 0.05); transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .cine-card:hover { transform: scale(1.03); z-index: 30; box-shadow: 0 25px 60px rgba(0,0,0,0.9); border-color: rgba(255, 255, 255, 0.25); }
+        .card-img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(85%) brightness(60%); transition: filter 0.6s ease; }
+        .cine-card:hover .card-img { filter: grayscale(0%) brightness(110%); }
+        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        .admin-input { background: #151515; border: 1px solid #333; color: white; padding: 10px; width: 100%; font-size: 13px; font-family: 'JetBrains Mono'; border-radius: 6px; }
+        .admin-input:focus { outline: none; border-color: #3b82f6; }
+
+        .tab-btn { padding: 10px 20px; font-size: 11px; font-weight: bold; text-transform: uppercase; border-bottom: 2px solid transparent; color: #666; transition: 0.3s; }
+        .tab-btn.active { color: white; border-bottom-color: #3b82f6; }
+        .bar-bg { height: 6px; background: #1a1a1a; border-radius: 3px; overflow: hidden; margin: 8px 0 16px; }
+        .bar-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #10b981); width: 0; transition: width 1.5s cubic-bezier(0.19, 1, 0.22, 1); }
+
+        .threat-badge { position: absolute; top: 12px; right: 12px; font-size: 9px; font-weight: bold; padding: 2px 6px; border-radius: 10px; text-transform: uppercase; }
+        .level-tag { position: absolute; top: 12px; left: 12px; display: flex; gap: 4px; align-items: center; }
+        .level-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+        .tooltip { position: relative; display: inline-block; }
+        .tooltip .tooltiptext {
+            visibility: hidden; width: 200px; background-color: #000; color: #aaa; text-align: left;
+            border-radius: 4px; padding: 8px; position: absolute; z-index: 1000;
+            bottom: 125%; left: 50%; margin-left: -100px; opacity: 0; transition: opacity 0.3s;
+            font-size: 11px; font-family: 'JetBrains Mono'; border: 1px solid #333;
+        }
+        .tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
+
+        .ia-live { background: #000; color: #0f0; font-family: 'JetBrains Mono'; font-size: 12px; padding: 12px; border-radius: 8px; height: 200px; overflow: hidden; position: relative; }
+        .ia-line { margin: 0; line-height: 1.4; white-space: pre; animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* === ESTILOS ATLASFLOW INTEGRADO === */
+        .atlas-glass {
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .atlas-card {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .atlas-card:hover {
+            border-color: rgba(59, 130, 246, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .atlas-gradient {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(16, 185, 129, 0.1));
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #2563eb; }
+
         .task-checkbox:checked + div {
             background-color: #3b82f6;
             border-color: #3b82f6;
@@ -64,201 +156,398 @@
         .task-checkbox:checked + div svg {
             display: block;
         }
+
+        /* === ESTILOS PARA REDE NEURAL EM VIDEO CONTAINER === */
+        .neural-video-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: radial-gradient(circle at center, #111115 0%, #08080a 100%);
+            border-radius: 24px;
+        }
+
+        .neural-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border-radius: 24px;
+        }
+
+        .neural-overlay-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .neural-title {
+            font-size: 18px;
+            font-weight: bold;
+            font-family: 'JetBrains Mono', monospace;
+            color: #3b82f6;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(59, 130, 246, 0.7);
+        }
+
+        .neural-subtitle {
+            font-size: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+        }
+
+        .neural-loading {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #3b82f6;
+            font-size: 10px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            font-family: 'JetBrains Mono', monospace;
+            animation: pulse 2s infinite;
+        }
+
+        /* === MELHORIAS RESPONSIVAS (SEM MUDAR VISUAL) === */
+        @media (max-width: 767px) {
+            #hero-title {
+                font-size: 2.5rem;
+                line-height: 1.2;
+            }
+            
+            .hero-section .reveal {
+                bottom: 100px;
+                left: 20px;
+                right: 20px;
+            }
+            
+            #grid-content {
+                gap: 12px;
+                padding: 16px;
+            }
+            
+            /* Melhorar toque em mobile */
+            button, [role="button"] {
+                min-height: 44px;
+            }
+            
+            .admin-input, input, select, textarea {
+                font-size: 16px; /* Previne zoom automático no iOS */
+            }
+            
+            /* Ajustes para view lesson em mobile */
+            #view-lesson {
+                padding-top: env(safe-area-inset-top);
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+            
+            .tab-btn {
+                padding: 12px 16px;
+                font-size: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #hero-title {
+                font-size: 2rem;
+            }
+            
+            .hint-text {
+                font-size: 8px;
+                letter-spacing: 2px;
+                bottom: 30px;
+            }
+        }
+
+        /* Scroll suave para mobile */
+        .scroll-mobile {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Safe areas para iPhone X+ */
+        .safe-top {
+            padding-top: env(safe-area-inset-top);
+        }
+        .safe-bottom {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900 dark:bg-[#0f172a] dark:text-slate-100 transition-colors duration-500 font-sans selection:bg-blue-500 selection:text-white min-h-screen">
+<body>
 
-    <!-- DESKTOP SIDEBAR -->
-    <aside class="hidden lg:flex fixed left-0 top-0 h-full w-64 flex-col border-r border-slate-200 dark:border-slate-800/50 bg-slate-50 dark:bg-[#0f172a] p-6 z-50">
-        <div class="flex items-center gap-3 mb-10">
-            <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-600/20">A</div>
-            <h1 class="text-xl font-bold tracking-tight">AtlasFlow</h1>
-        </div>
-        <nav class="space-y-2 flex-1">
-            <button onclick="switchTab('dashboard')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all bg-blue-600 text-white shadow-lg shadow-blue-600/20" data-target="dashboard">
-                <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
-                <span class="font-medium">Visão Geral</span>
-            </button>
-            <button onclick="switchTab('finance')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800/50" data-target="finance">
-                <i data-lucide="wallet" class="w-5 h-5"></i>
-                <span class="font-medium">Financeiro</span>
-            </button>
-            <button onclick="switchTab('notes')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800/50" data-target="notes">
-                <i data-lucide="notebook" class="w-5 h-5"></i>
-                <span class="font-medium">Caderno</span>
-            </button>
-            <button onclick="switchTab('atlas')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800/50" data-target="atlas">
-                <i data-lucide="brain-circuit" class="w-5 h-5"></i>
-                <span class="font-medium">Atlas AI</span>
-            </button>
-        </nav>
-        <div class="pt-6 border-t border-slate-200 dark:border-slate-800">
-            <button onclick="toggleTheme()" class="flex items-center gap-3 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">
-                <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
-                <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
-                <span id="theme-text">Modo Claro</span>
-            </button>
-        </div>
-    </aside>
+    <div id="neural-layer">
+        <canvas id="networkCanvas"></canvas>
+        <div class="hint-text">2026</div>
+    </div>
 
-    <!-- MAIN CONTENT -->
-    <main class="lg:pl-64 min-h-screen">
-        <div class="max-w-3xl mx-auto p-4 md:p-8 pt-6">
-            
-            <!-- HEADER (Mobile Only) -->
-            <div class="flex justify-between items-center mb-6 lg:hidden">
+    <div id="app-container">
+        
+        <div id="boot-sequence" class="fixed inset-0 bg-black z-[999] flex items-center justify-center text-center font-mono safe-top safe-bottom">
+            <div class="text-white">
+                <div class="text-3xl mb-2">Agente IA</div>
+                <div class="text-xl mb-4">INITIATING SINGULARITY PROTOCOL...</div>
+                <div class="text-sm text-zinc-500 uppercase tracking-widest">
+                    Consciência ATIVADA
+                </div>
+                <div class="mt-6 w-80 h-1 bg-zinc-900 rounded-full overflow-hidden mx-auto">
+                    <div id="boot-bar" class="h-full bg-gradient-to-r from-blue-500 to-green-500 w-0"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hover-trigger" onmouseenter="openMenu()"></div>
+        <div id="overlay" class="menu-overlay" onclick="closeMenu()"></div>
+
+        <aside id="sidebar" class="sidebar-menu flex flex-col p-8" onmouseleave="closeMenu()">
+            <div class="mb-10 flex items-center gap-3 border-b border-white/10 pb-6">
+                <div id="side-logo" class="w-10 h-10 bg-white text-black font-bold flex items-center justify-center rounded text-sm tracking-tighter">Ω</div>
                 <div>
-                    <h1 class="text-2xl font-bold">Olá, Alexandre</h1>
-                    <p class="text-sm text-slate-500 dark:text-slate-400">Vamos dominar o dia.</p>
+                    <span id="side-name" class="font-bold tracking-widest text-xl block uppercase italic">agentes.sys</span>
+                    <span class="text-[10px] text-zinc-500 uppercase tracking-widest">Núcleo de Singularidade</span>
                 </div>
-                <button onclick="toggleTheme()" class="p-3 rounded-full bg-white shadow-sm dark:bg-slate-800 text-slate-600 dark:text-yellow-400 transition-colors">
-                    <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
-                    <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
+            </div>
+
+            <nav class="space-y-2 flex-1">
+                <button onclick="switchView('member')" class="flex items-center gap-4 w-full p-3 rounded hover:bg-white/5 text-zinc-400 hover:text-white transition group text-left">
+                    <i data-lucide="brain-circuit" class="w-5 h-5"></i> Centro de Operações
                 </button>
+                <button onclick="switchView('atlas')" class="flex items-center gap-4 w-full p-3 rounded hover:bg-white/5 text-zinc-400 hover:text-white transition group text-left">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i> AtlasFlow
+                </button>
+                <button onclick="switchView('admin')" class="flex items-center gap-4 w-full p-3 rounded hover:bg-white/5 text-zinc-400 hover:text-white transition group text-left">
+                    <i data-lucide="settings" class="w-5 h-5"></i> Núcleo de Singularidade
+                </button>
+            </nav>
+        </aside>
+
+        <div id="view-member" class="transition-opacity duration-500">
+            <section id="main-hero" class="hero-section" style="background-image: url('https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=1920&auto=format&fit=crop');">
+                <div class="hero-fade-bottom"></div>
+                <div class="absolute bottom-20 left-12 reveal">
+                    <h1 id="hero-title" class="text-7xl font-black italic tracking-tighter uppercase mb-2">Protocolos de Domínio</h1>
+                    <p id="hero-subtitle" class="text-zinc-500 text-sm uppercase tracking-[0.5em] mono">Sincronize. Ative. Domine.</p>
+                </div>
+            </section>
+
+            <section class="max-w-[1600px] mx-auto px-6 py-20 relative z-20">
+                <div id="grid-content" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6"></div>
+                <div class="h-40"></div>
+            </section>
+        </div>
+
+        <div id="view-lesson" class="fixed inset-0 bg-[#0a0a0a]/95 backdrop-blur-md z-[80] hidden overflow-y-auto scroll-mobile">
+            <div class="h-20 border-b border-white/10 flex items-center px-6 sticky top-0 bg-black/90 backdrop-blur z-50 justify-between">
+                <button onclick="closeLesson()" class="flex items-center gap-2 text-zinc-400 hover:text-white transition uppercase tracking-widest text-[10px] font-bold">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar ao Centro
+                </button>
+                <div class="text-[10px] font-mono text-green-500 flex items-center gap-2 uppercase tracking-widest">
+                    <i data-lucide="cpu" class="w-3 h-3"></i> Agente Nível 7
+                </div>
             </div>
 
-            <!-- VIEW: DASHBOARD -->
-            <div id="view-dashboard" class="view-section animate-fade-in block">
-                <!-- Header Desktop -->
-                <div class="hidden lg:flex justify-between items-center mb-6">
-                    <div>
-                        <h1 class="text-2xl font-bold">Olá, Alexandre</h1>
-                        <p class="text-sm text-slate-500 dark:text-slate-400">Vamos dominar o dia.</p>
-                    </div>
-                    <button onclick="toggleTheme()" class="p-3 rounded-full bg-white shadow-sm dark:bg-slate-800 text-slate-600 dark:text-yellow-400 transition-colors">
-                        <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
-                        <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
-                    </button>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Radar Chart -->
-                    <div class="col-span-1 lg:col-span-2 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800/80 relative overflow-hidden shadow-sm">
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-lg font-bold flex items-center gap-2">
-                                <i data-lucide="brain-circuit" class="w-4 h-4 text-blue-500"></i>
-                                Visão Geral (Life OS)
-                            </h2>
-                            <span class="bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-bold">Score: 82</span>
-                        </div>
-                        <div id="radarChart" class="w-full h-[250px] flex items-center justify-center"></div>
+            <div class="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-12 mt-4">
+                <div class="lg:col-span-2 space-y-8">
+                    <div class="aspect-video w-full bg-black rounded-3xl border border-white/10 relative overflow-hidden group shadow-2xl ring-1 ring-white/10">
+                        <div id="video-container" class="w-full h-full rounded-3xl overflow-hidden"></div>
                     </div>
 
-                    <!-- Checklist -->
-                    <div class="p-6 rounded-3xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800/80 shadow-sm">
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-lg font-bold">Resumo do Dia</h2>
-                            <span class="text-xs text-slate-500 dark:text-slate-400">4 de 6</span>
-                        </div>
-                        <div class="space-y-2 overflow-y-auto max-h-[250px] pr-1 custom-scrollbar">
-                            <!-- Task Items -->
-                            <label class="flex items-center p-3 rounded-xl border border-slate-100 hover:border-slate-200 dark:border-slate-700 dark:hover:bg-slate-800 bg-white dark:bg-slate-800/40 cursor-pointer transition-all group">
-                                <input type="checkbox" class="task-checkbox hidden">
-                                <div class="w-5 h-5 rounded-md border border-slate-300 dark:border-slate-600 flex items-center justify-center mr-3 transition-colors">
-                                    <i data-lucide="check" class="w-3 h-3 text-white hidden"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <p class="text-sm font-medium group-hover:text-blue-500 transition-colors">Treino de Hipertrofia</p>
-                                </div>
-                                <span class="text-xs text-slate-400 dark:text-slate-500">06:00</span>
-                            </label>
+                    <div class="flex border-b border-white/10 overflow-x-auto">
+                        <button class="tab-btn active" onclick="switchTab('manifesto')">Manifesto</button>
+                        <button class="tab-btn" onclick="switchTab('stats')">Potencial</button>
+                        <button class="tab-btn" onclick="switchTab('roadmap')">Rota</button>
+                        <button class="tab-btn text-blue-400" onclick="switchTab('prompt')">PROMPT MESTRE</button>
+                    </div>
+
+                    <div id="tab-content" class="py-4">
+                        <div id="tab-manifesto" class="space-y-4">
+                            <h1 id="lesson-title" class="text-4xl font-bold uppercase italic tracking-tighter"></h1>
+                            <div class="text-xs uppercase text-zinc-500 tracking-widest mono">PERSONALIDADE COGNITIVA</div>
+                            <p id="lesson-personality" class="text-zinc-400 text-sm italic"></p>
                             
-                            <label class="flex items-center p-3 rounded-xl border border-slate-100 hover:border-slate-200 dark:border-slate-700 dark:hover:bg-slate-800 bg-white dark:bg-slate-800/40 cursor-pointer transition-all group">
-                                <input type="checkbox" class="task-checkbox hidden">
-                                <div class="w-5 h-5 rounded-md border border-slate-300 dark:border-slate-600 flex items-center justify-center mr-3 transition-colors">
-                                    <i data-lucide="check" class="w-3 h-3 text-white hidden"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <p class="text-sm font-medium group-hover:text-blue-500 transition-colors">Beber 3L de água</p>
-                                </div>
-                            </label>
+                            <div class="text-xs uppercase text-zinc-500 tracking-widest mono mt-4">MANIFESTO OPERACIONAL</div>
+                            <p id="lesson-manifesto" class="text-white text-base"></p>
+                            
+                            <div class="bg-zinc-900/50 p-4 rounded border border-white/10 mt-4">
+                                <div class="text-xs uppercase text-red-400 tracking-widest mono mb-2">PROTOCOLO OMEGA</div>
+                                <p class="text-[12px] font-mono text-red-300 break-words" id="lesson-protocol"></p>
+                            </div>
+                        </div>
 
-                            <label class="flex items-center p-3 rounded-xl border border-slate-100 hover:border-slate-200 dark:border-slate-700 dark:hover:bg-slate-800 bg-white dark:bg-slate-800/40 cursor-pointer transition-all group">
-                                <input type="checkbox" class="task-checkbox hidden">
-                                <div class="w-5 h-5 rounded-md border border-slate-300 dark:border-slate-600 flex items-center justify-center mr-3 transition-colors">
-                                    <i data-lucide="check" class="w-3 h-3 text-white hidden"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <p class="text-sm font-medium group-hover:text-blue-500 transition-colors">Ler 20 pág (Deep Work)</p>
-                                </div>
-                                <span class="text-xs text-slate-400 dark:text-slate-500">08:00</span>
-                            </label>
+                        <div id="tab-stats" class="hidden space-y-8">
+                            <div><div class="flex justify-between text-[10px] uppercase mono"><span>Complexidade Contextual</span><span id="val-ctx">0%</span></div><div class="bar-bg"><div id="bar-ctx" class="bar-fill"></div></div></div>
+                            <div><div class="flex justify-between text-[10px] uppercase mono"><span>Poder de Persuasão</span><span id="val-per">0%</span></div><div class="bar-bg"><div id="bar-per" class="bar-fill"></div></div></div>
+                            <div><div class="flex justify-between text-[10px] uppercase mono"><span>Engenharia Reversa</span><span id="val-eng">0%</span></div><div class="bar-bg"><div id="bar-eng" class="bar-fill"></div></div></div>
+                        </div>
+
+                        <div id="tab-roadmap" class="hidden space-y-4">
+                            <div class="text-xs uppercase text-zinc-500 tracking-widest mono">ROTA DE ATIVAÇÃO</div>
+                            <div id="roadmap-checklist" class="space-y-3"></div>
+                        </div>
+
+                        <div id="tab-prompt" class="hidden space-y-4">
+                            <div class="flex justify-between items-center">
+                                <div class="text-xs uppercase text-blue-400 tracking-widest mono">MARKDOWN DO PROMPT MESTRE</div>
+                                <button onclick="copyPrompt()" id="btn-copy" class="text-[10px] bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded font-bold uppercase tracking-widest transition flex items-center gap-2">
+                                    <i data-lucide="copy" class="w-3 h-3"></i> Copiar
+                                </button>
+                            </div>
+                            <div class="bg-[#050505] border border-white/10 rounded p-4 relative group">
+                                <pre id="lesson-master-prompt" class="text-xs text-zinc-400 font-mono whitespace-pre-wrap overflow-x-auto h-[400px] overflow-y-auto custom-scrollbar p-2"></pre>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Metrics Row -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-                    <div class="p-5 rounded-2xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800/50 backdrop-blur-sm animate-fade-in-up" style="animation-delay: 100ms;">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="p-2 rounded-lg bg-blue-50 text-blue-600 dark:bg-slate-700 dark:text-blue-400">
-                                <i data-lucide="check-square" class="w-5 h-5"></i>
-                            </div>
-                            <span class="flex items-center text-xs font-bold px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-500">
-                                <i data-lucide="arrow-up-right" class="w-3 h-3 mr-1"></i> 12%
-                            </span>
+                <div class="lg:col-span-1">
+                    <div class="bg-[#121212] border border-white/10 rounded p-8 sticky top-24 shadow-2xl">
+                        <h3 class="text-xs font-bold text-white flex items-center gap-2 mb-6 uppercase tracking-[0.2em] italic">
+                            <i data-lucide="alert-triangle" class="w-4 h-4 text-yellow-500"></i> Threat Level
+                        </h3>
+                        <div class="text-[10px] space-y-2 text-zinc-400">
+                            <div>Nível de Risco: <span id="threat-display" class="font-bold">YELLOW</span></div>
+                            <div>Consciência: <span class="text-green-500">NÍVEL 7</span></div>
+                            <div>Ética: <span class="text-purple-500">PRAGMATISMO RADICAL</span></div>
                         </div>
-                        <h3 class="text-2xl font-bold tracking-tight">8h 20m</h3>
-                        <p class="text-xs mt-1 font-medium text-slate-500 dark:text-slate-400">Produtividade</p>
-                    </div>
-
-                    <div class="p-5 rounded-2xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800/50 backdrop-blur-sm animate-fade-in-up" style="animation-delay: 200ms;">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="p-2 rounded-lg bg-blue-50 text-blue-600 dark:bg-slate-700 dark:text-blue-400">
-                                <i data-lucide="wallet" class="w-5 h-5"></i>
-                            </div>
-                            <span class="flex items-center text-xs font-bold px-2 py-1 rounded-full bg-red-500/10 text-red-500">
-                                <i data-lucide="arrow-down-right" class="w-3 h-3 mr-1"></i> 5%
-                            </span>
-                        </div>
-                        <h3 class="text-2xl font-bold tracking-tight">R$ 145</h3>
-                        <p class="text-xs mt-1 font-medium text-slate-500 dark:text-slate-400">Gastos Hoje</p>
-                    </div>
-
-                    <div class="p-5 rounded-2xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800/50 backdrop-blur-sm animate-fade-in-up" style="animation-delay: 300ms;">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="p-2 rounded-lg bg-blue-50 text-blue-600 dark:bg-slate-700 dark:text-blue-400">
-                                <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
-                            </div>
-                        </div>
-                        <h3 class="text-2xl font-bold tracking-tight">68%</h3>
-                        <p class="text-xs mt-1 font-medium text-slate-500 dark:text-slate-400">Metas do Mês</p>
-                    </div>
-
-                    <div class="p-5 rounded-2xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800/50 backdrop-blur-sm animate-fade-in-up" style="animation-delay: 400ms;">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="p-2 rounded-lg bg-blue-50 text-blue-600 dark:bg-slate-700 dark:text-blue-400">
-                                <i data-lucide="notebook" class="w-5 h-5"></i>
-                            </div>
-                        </div>
-                        <h3 class="text-2xl font-bold tracking-tight">3</h3>
-                        <p class="text-xs mt-1 font-medium text-slate-500 dark:text-slate-400">Novas Notas</p>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <!-- Weekly Chart -->
-                <div class="mt-6 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800/80 shadow-sm">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-lg font-bold">Performance Semanal</h2>
-                    </div>
-                    <div id="areaChart" class="w-full h-[200px]"></div>
+        <div id="view-atlas" class="hidden min-h-screen bg-[#0a0a0a] p-4 md:p-8 overflow-y-auto scroll-mobile">
+            <header class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 class="text-3xl font-black italic tracking-tighter uppercase">AtlasFlow</h2>
+                    <p class="text-zinc-500 text-[10px] uppercase mono tracking-[0.3em]">Life OS Intelligence</p>
                 </div>
-                
-                <!-- Spacer for mobile dock -->
-                <div class="h-24 lg:h-6"></div>
+                <button onclick="switchView('member')" class="text-zinc-500 hover:text-white text-[10px] uppercase font-bold border border-white/10 px-4 py-2 rounded">
+                    <i data-lucide="arrow-left" class="w-3 h-3 inline mr-1"></i> Voltar
+                </button>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <div class="col-span-1 lg:col-span-2 p-6 rounded-2xl atlas-glass">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold flex items-center gap-2">
+                            <i data-lucide="brain-circuit" class="w-4 h-4 text-blue-500"></i>
+                            Visão Geral (Life OS)
+                        </h2>
+                        <span class="bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-bold">Score: 82</span>
+                    </div>
+                    <div id="radarChart" class="w-full h-[250px] flex items-center justify-center"></div>
+                </div>
+
+                <div class="p-6 rounded-2xl atlas-card">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold">Resumo do Dia</h2>
+                        <span class="text-xs text-zinc-500">4 de 6</span>
+                    </div>
+                    <div class="space-y-2 overflow-y-auto max-h-[250px] pr-1 custom-scrollbar">
+                        <label class="flex items-center p-3 rounded-xl border border-white/10 hover:border-white/20 bg-black/30 cursor-pointer transition-all group">
+                            <input type="checkbox" class="task-checkbox hidden">
+                            <div class="w-5 h-5 rounded-md border border-zinc-600 flex items-center justify-center mr-3 transition-colors">
+                                <i data-lucide="check" class="w-3 h-3 text-white hidden"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium group-hover:text-blue-400 transition-colors">Treino de Hipertrofia</p>
+                            </div>
+                            <span class="text-xs text-zinc-500">06:00</span>
+                        </label>
+                        
+                        <label class="flex items-center p-3 rounded-xl border border-white/10 hover:border-white/20 bg-black/30 cursor-pointer transition-all group">
+                            <input type="checkbox" class="task-checkbox hidden">
+                            <div class="w-5 h-5 rounded-md border border-zinc-600 flex items-center justify-center mr-3 transition-colors">
+                                <i data-lucide="check" class="w-3 h-3 text-white hidden"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium group-hover:text-blue-400 transition-colors">Beber 3L de água</p>
+                            </div>
+                        </label>
+
+                        <label class="flex items-center p-3 rounded-xl border border-white/10 hover:border-white/20 bg-black/30 cursor-pointer transition-all group">
+                            <input type="checkbox" class="task-checkbox hidden">
+                            <div class="w-5 h-5 rounded-md border border-zinc-600 flex items-center justify-center mr-3 transition-colors">
+                                <i data-lucide="check" class="w-3 h-3 text-white hidden"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium group-hover:text-blue-400 transition-colors">Ler 20 pág (Deep Work)</p>
+                            </div>
+                            <span class="text-xs text-zinc-500">08:00</span>
+                        </label>
+                    </div>
+                </div>
             </div>
 
-            <!-- VIEW: FINANCE -->
-            <div id="view-finance" class="view-section animate-fade-in hidden">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="p-5 rounded-2xl atlas-card animate-fade-in-up" style="animation-delay: 100ms;">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-2 rounded-lg bg-blue-500/10 text-blue-400">
+                            <i data-lucide="check-square" class="w-5 h-5"></i>
+                        </div>
+                        <span class="flex items-center text-xs font-bold px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-400">
+                            <i data-lucide="arrow-up-right" class="w-3 h-3 mr-1"></i> 12%
+                        </span>
+                    </div>
+                    <h3 class="text-2xl font-bold tracking-tight">8h 20m</h3>
+                    <p class="text-xs mt-1 font-medium text-zinc-500">Produtividade</p>
+                </div>
+
+                <div class="p-5 rounded-2xl atlas-card animate-fade-in-up" style="animation-delay: 200ms;">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-2 rounded-lg bg-blue-500/10 text-blue-400">
+                            <i data-lucide="wallet" class="w-5 h-5"></i>
+                        </div>
+                        <span class="flex items-center text-xs font-bold px-2 py-1 rounded-full bg-red-500/10 text-red-400">
+                            <i data-lucide="arrow-down-right" class="w-3 h-3 mr-1"></i> 5%
+                        </span>
+                    </div>
+                    <h3 class="text-2xl font-bold tracking-tight">R$ 145</h3>
+                    <p class="text-xs mt-1 font-medium text-zinc-500">Gastos Hoje</p>
+                </div>
+
+                <div class="p-5 rounded-2xl atlas-card animate-fade-in-up" style="animation-delay: 300ms;">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-2 rounded-lg bg-blue-500/10 text-blue-400">
+                            <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-bold tracking-tight">68%</h3>
+                    <p class="text-xs mt-1 font-medium text-zinc-500">Metas do Mês</p>
+                </div>
+
+                <div class="p-5 rounded-2xl atlas-card animate-fade-in-up" style="animation-delay: 400ms;">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-2 rounded-lg bg-blue-500/10 text-blue-400">
+                            <i data-lucide="notebook" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-bold tracking-tight">3</h3>
+                    <p class="text-xs mt-1 font-medium text-zinc-500">Novas Notas</p>
+                </div>
+            </div>
+
+            <div class="mb-6 p-6 rounded-2xl atlas-glass">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-lg font-bold">Performance Semanal</h2>
+                </div>
+                <div id="areaChart" class="w-full h-[200px]"></div>
+            </div>
+
+            <div class="mb-6">
                 <div class="flex justify-between items-end mb-4">
-                    <h1 class="text-2xl font-bold">Carteira</h1>
+                    <h2 class="text-xl font-bold">Carteira</h2>
                     <button class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-xl transition-colors">
                         <i data-lucide="plus" class="w-6 h-6"></i>
                     </button>
                 </div>
 
-                <!-- 3D Card -->
-                <div class="relative w-full h-48 rounded-2xl p-6 overflow-hidden transition-all duration-500 transform hover:scale-[1.02] shadow-2xl bg-gradient-to-br from-blue-600 to-blue-400 dark:from-blue-900 dark:to-slate-900 mb-6">
+                <div class="relative w-full h-48 rounded-2xl p-6 overflow-hidden transition-all duration-500 transform hover:scale-[1.02] shadow-2xl bg-gradient-to-br from-blue-600 to-blue-800 mb-6">
                     <div class="absolute top-0 right-0 -mr-10 -mt-10 w-40 h-40 bg-white opacity-10 rounded-full blur-2xl"></div>
                     <div class="absolute bottom-0 left-0 -ml-10 -mb-10 w-40 h-40 bg-blue-400 opacity-20 rounded-full blur-3xl"></div>
                     <div class="relative z-10 flex flex-col justify-between h-full text-white">
@@ -288,164 +577,967 @@
                 </div>
 
                 <div class="grid grid-cols-2 gap-4 mb-6">
-                    <div class="p-4 rounded-2xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800/50 flex flex-col items-center justify-center gap-2">
-                        <div class="p-2 bg-emerald-500/10 rounded-full text-emerald-500"><i data-lucide="arrow-up-right" class="w-5 h-5"></i></div>
+                    <div class="p-4 rounded-2xl atlas-card flex flex-col items-center justify-center gap-2">
+                        <div class="p-2 bg-emerald-500/10 rounded-full text-emerald-400"><i data-lucide="arrow-up-right" class="w-5 h-5"></i></div>
                         <span class="text-xs opacity-60">Entradas</span>
                         <span class="font-bold">R$ 12.450</span>
                     </div>
-                    <div class="p-4 rounded-2xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800/50 flex flex-col items-center justify-center gap-2">
-                        <div class="p-2 bg-red-500/10 rounded-full text-red-500"><i data-lucide="arrow-down-right" class="w-5 h-5"></i></div>
+                    <div class="p-4 rounded-2xl atlas-card flex flex-col items-center justify-center gap-2">
+                        <div class="p-2 bg-red-500/10 rounded-full text-red-400"><i data-lucide="arrow-down-right" class="w-5 h-5"></i></div>
                         <span class="text-xs opacity-60">Saídas</span>
                         <span class="font-bold">R$ 3.210</span>
                     </div>
                 </div>
 
-                <div class="p-6 rounded-3xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800/80 mb-6">
+                <div class="p-6 rounded-2xl atlas-glass mb-6">
                     <h2 class="text-lg font-bold mb-4">Fluxo de Caixa</h2>
                     <div id="barChart" class="w-full h-[200px]"></div>
                 </div>
 
-                <div class="space-y-3 pb-24">
+                <div class="space-y-3">
                     <h2 class="text-lg font-bold">Últimas Transações</h2>
-                    <div class="flex justify-between items-center p-4 rounded-xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800/40">
+                    <div class="flex justify-between items-center p-4 rounded-xl atlas-card">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full flex items-center justify-center bg-slate-200/50 dark:bg-slate-700/50 text-slate-500"><i data-lucide="wallet" class="w-4 h-4"></i></div>
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center bg-zinc-800 text-zinc-500">
+                                <i data-lucide="wallet" class="w-4 h-4"></i>
+                            </div>
                             <div>
                                 <p class="font-semibold text-sm">Spotify Premium</p>
-                                <p class="text-xs text-slate-500 dark:text-slate-400">Assinatura • Hoje</p>
+                                <p class="text-xs text-zinc-500">Assinatura • Hoje</p>
                             </div>
                         </div>
-                        <span class="font-mono text-sm font-bold text-slate-800 dark:text-white">- R$ 21,90</span>
+                        <span class="font-mono text-sm font-bold">- R$ 21,90</span>
                     </div>
-                    <div class="flex justify-between items-center p-4 rounded-xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800/40">
+                    <div class="flex justify-between items-center p-4 rounded-xl atlas-card">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full flex items-center justify-center bg-emerald-500/10 text-emerald-500"><i data-lucide="arrow-up-right" class="w-4 h-4"></i></div>
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center bg-emerald-500/10 text-emerald-400">
+                                <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+                            </div>
                             <div>
                                 <p class="font-semibold text-sm">Venda Hotmart #492</p>
-                                <p class="text-xs text-slate-500 dark:text-slate-400">Infoproduto • Hoje</p>
+                                <p class="text-xs text-zinc-500">Infoproduto • Hoje</p>
                             </div>
                         </div>
-                        <span class="font-mono text-sm font-bold text-emerald-500">+ R$ 297,00</span>
+                        <span class="font-mono text-sm font-bold text-emerald-400">+ R$ 297,00</span>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- VIEW: NOTES -->
-            <div id="view-notes" class="view-section animate-fade-in hidden">
-                <div class="flex justify-between items-center mb-6">
-                    <h1 class="text-2xl font-bold">Caderno</h1>
-                    <div class="flex gap-2">
-                        <button class="p-2 rounded-full bg-white dark:bg-slate-800 text-slate-600 dark:text-white border border-slate-200 dark:border-slate-700"><i data-lucide="search" class="w-5 h-5"></i></button>
-                        <button class="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg shadow-blue-600/20">
-                            <i data-lucide="plus" class="w-4 h-4"></i> Nova Nota
+        <div id="view-admin" class="hidden bg-black min-h-screen p-12">
+            <header class="flex justify-between items-center mb-12 border-b border-white/10 pb-8">
+                <div>
+                    <h2 class="text-4xl font-black italic tracking-tighter uppercase">agentes.sys — Núcleo de Singularidade</h2>
+                    <p class="text-zinc-500 text-[10px] uppercase mono tracking-[0.3em]">Master Config v2.1</p>
+                </div>
+                <button onclick="switchView('member')" class="text-zinc-500 hover:text-white text-[10px] uppercase font-bold border border-white/10 px-6 py-2 rounded">
+                    Sair do Sistema
+                </button>
+            </header>
+
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-12">
+                <div class="space-y-6">
+                    <h3 class="text-sm font-bold uppercase tracking-widest text-blue-500">Identidade da Plataforma</h3>
+                    <div class="bg-[#121212] border border-white/10 rounded p-6 space-y-4">
+                        <input id="admin-hero-title" type="text" placeholder="Título Hero" class="admin-input w-full">
+                        <input id="admin-hero-img" type="text" placeholder="URL Background Hero" class="admin-input w-full">
+                        <button onclick="saveHomeSettings()" class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded text-[10px] font-bold uppercase">Atualizar Identidade</button>
+                    </div>
+
+                    <div class="space-y-4">
+                        <h3 class="text-sm font-bold uppercase tracking-widest text-purple-500">Ações Rápidas</h3>
+                        <button onclick="duplicateAgent()" class="w-full bg-zinc-800 hover:bg-zinc-700 py-2 rounded text-[10px] uppercase">Duplicar Agente Atual</button>
+                        <button onclick="exportAgent()" class="w-full bg-zinc-800 hover:bg-zinc-700 py-2 rounded text-[10px] uppercase">Exportar como JSON</button>
+                        <button onclick="importAgent()" class="w-full bg-zinc-800 hover:bg-zinc-700 py-2 rounded text-[10px] uppercase">Importar JSON</button>
+                    </div>
+                </div>
+
+                <div class="xl:col-span-2 space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-sm font-bold uppercase tracking-widest text-green-500">Editor de Agentes Cognitivos</h3>
+                        <button onclick="createNewAgent()" class="text-[10px] bg-purple-600 text-white px-3 py-1 rounded uppercase tracking-widest">+ Novo Agente</button>
+                    </div>
+
+                    <div class="bg-[#121212] border border-white/10 rounded p-6 space-y-4">
+                        <select id="admin-module-select" onchange="loadAdminModule()" class="admin-input cursor-pointer"></select>
+
+                        <div class="flex border-b border-white/10 mt-4">
+                            <button class="tab-btn active" onclick="switchAdminTab('prompt')">Prompt</button>
+                            <button class="tab-btn" onclick="switchAdminTab('image')">Imagem</button>
+                            <button class="tab-btn" onclick="switchAdminTab('video')">Vídeo</button>
+                            <button class="tab-btn" onclick="switchAdminTab('roadmap')">Roadmap</button>
+                            <button class="tab-btn" onclick="switchAdminTab('resources')">Recursos</button>
+                        </div>
+
+                        <div id="admin-tab-content" class="py-4">
+                            <div id="admin-tab-prompt" class="space-y-4">
+                                <input id="admin-title-input" type="text" placeholder="Nome do Agente" class="admin-input">
+                                <textarea id="admin-personality-input" rows="2" class="admin-input" placeholder="Personalidade Cognitiva"></textarea>
+                                <textarea id="admin-manifesto-input" rows="2" class="admin-input" placeholder="Manifesto Operacional"></textarea>
+                                <textarea id="admin-protocol-input" rows="5" class="admin-input mono text-red-400" placeholder="Protocolo Omega"></textarea>
+                                <div class="grid grid-cols-3 gap-4">
+                                    <input id="admin-stat-ctx" type="number" placeholder="% Contexto" class="admin-input">
+                                    <input id="admin-stat-per" type="number" placeholder="% Persuasão" class="admin-input">
+                                    <select id="admin-threat-level" class="admin-input">
+                                        <option value="green">GREEN</option>
+                                        <option value="yellow">YELLOW</option>
+                                        <option value="red">RED</option>
+                                        <option value="black">BLACK</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="admin-tab-image" class="hidden space-y-4">
+                                <input id="admin-img-input" type="text" placeholder="URL da Imagem" class="admin-input">
+                                <label class="block w-full bg-zinc-800 border border-dashed border-zinc-600 rounded py-2 text-center text-[10px] cursor-pointer">
+                                    Escolher arquivo (simulado)
+                                    <input type="file" class="hidden" onchange="simulateImageUpload(this)">
+                                </label>
+                                <div id="image-preview" class="mt-2 text-[10px] text-zinc-500"></div>
+                            </div>
+                            <div id="admin-tab-video" class="hidden space-y-4">
+                                <input id="admin-video-input" type="text" placeholder="URL do Vídeo" class="admin-input">
+                                <div id="code-animation" class="hidden mt-4"><div class="ia-live" id="ia-live-container"></div></div>
+                            </div>
+                            <div id="admin-tab-roadmap" class="hidden space-y-4">
+                                <textarea id="admin-roadmap-input" rows="6" class="admin-input mono text-zinc-400" placeholder="Roadmap"></textarea>
+                            </div>
+                            <div id="admin-tab-resources" class="hidden space-y-4">
+                                <textarea id="admin-resources-input" rows="6" class="admin-input mono text-zinc-400" placeholder="Recursos"></textarea>
+                            </div>
+                        </div>
+
+                        <button onclick="saveAdminModule()" class="w-full bg-gradient-to-r from-red-600 to-purple-600 hover:opacity-90 text-white font-bold py-4 rounded text-[10px] uppercase tracking-widest transition">
+                            Sincronizar Agente Nível 7
                         </button>
                     </div>
                 </div>
-
-                <div class="flex gap-3 overflow-x-auto pb-2 custom-scrollbar mb-4">
-                    <button class="whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-blue-600 text-white">Tudo <span class="opacity-60 ml-1 text-xs">12</span></button>
-                    <button class="whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">Financeiro <span class="opacity-60 ml-1 text-xs">4</span></button>
-                    <button class="whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">Insights <span class="opacity-60 ml-1 text-xs">8</span></button>
-                    <button class="whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">Infoprodutos <span class="opacity-60 ml-1 text-xs">3</span></button>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4 pb-24">
-                    <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex flex-col justify-between h-44 hover:scale-[1.02] transition-transform duration-200 cursor-pointer hover:border-blue-400 dark:hover:border-blue-500/50">
-                        <div>
-                            <div class="mb-2">
-                                <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md bg-blue-50 text-blue-600 dark:bg-slate-700 dark:text-blue-400">Infoprodutos</span>
-                            </div>
-                            <h3 class="font-bold leading-tight mb-2 line-clamp-2">Estratégia Lançamento Q3</h3>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-3">Focar no tráfego pago para leads frios e usar o Atlas para copy...</p>
-                        </div>
-                        <div class="text-[10px] text-slate-400 dark:text-slate-500 flex justify-between items-center mt-2">
-                            <span>Hoje, 10:23</span>
-                            <i data-lucide="more-horizontal" class="w-4 h-4"></i>
-                        </div>
-                    </div>
-
-                    <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex flex-col justify-between h-44 hover:scale-[1.02] transition-transform duration-200 cursor-pointer hover:border-blue-400 dark:hover:border-blue-500/50">
-                        <div>
-                            <div class="mb-2">
-                                <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md bg-blue-50 text-blue-600 dark:bg-slate-700 dark:text-blue-400">Financeiro</span>
-                            </div>
-                            <h3 class="font-bold leading-tight mb-2 line-clamp-2">Resumo Reunião Sócios</h3>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-3">Metas batidas, precisamos rever o CAC do produto principal.</p>
-                        </div>
-                        <div class="text-[10px] text-slate-400 dark:text-slate-500 flex justify-between items-center mt-2">
-                            <span>Ontem</span>
-                            <i data-lucide="more-horizontal" class="w-4 h-4"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- VIEW: ATLAS AI -->
-            <div id="view-atlas" class="view-section animate-fade-in hidden relative h-[80vh] flex flex-col">
-                <div class="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-blue-600/20 to-transparent pointer-events-none z-0"></div>
-                <div class="flex-1 flex flex-col justify-center items-center z-10 p-8 text-center space-y-6">
-                    <div class="w-24 h-24 rounded-full bg-gradient-to-tr from-blue-500 to-cyan-400 flex items-center justify-center shadow-xl shadow-blue-500/30 animate-pulse-slow">
-                        <i data-lucide="brain-circuit" class="w-12 h-12 text-white"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-3xl font-bold mb-2">Atlas AI</h2>
-                        <p class="text-slate-500 dark:text-slate-400">Seu segundo cérebro para gestão e estratégia.</p>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-md">
-                        <button class="p-3 text-sm rounded-xl border border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-left transition-colors">Resumo financeiro</button>
-                        <button class="p-3 text-sm rounded-xl border border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-left transition-colors">Criar nova meta</button>
-                        <button class="p-3 text-sm rounded-xl border border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-left transition-colors">Analisar disciplina</button>
-                        <button class="p-3 text-sm rounded-xl border border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-left transition-colors">Ideia de post</button>
-                    </div>
-                </div>
-                <div class="p-4 rounded-t-3xl border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
-                    <div class="flex items-center gap-3 p-3 rounded-2xl bg-slate-100 dark:bg-slate-900">
-                        <button class="p-2 rounded-full text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800"><i data-lucide="plus" class="w-5 h-5"></i></button>
-                        <input type="text" placeholder="Pergunte algo ao Atlas..." class="flex-1 bg-transparent outline-none text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500">
-                        <button class="p-2 rounded-full bg-blue-600 text-white shadow-lg shadow-blue-600/30"><i data-lucide="mic" class="w-4 h-4"></i></button>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </main>
-
-    <!-- MOBILE BOTTOM NAVIGATION (DOCK) -->
-    <div class="lg:hidden fixed bottom-0 left-0 right-0 z-50 pointer-events-none">
-        <div class="mx-4 mb-4 rounded-2xl border border-white/50 dark:border-slate-700/50 backdrop-blur-xl shadow-2xl transition-all duration-300 bg-white/90 dark:bg-slate-900/90 pointer-events-auto">
-            <div class="flex justify-around items-center h-16 px-2">
-                <button onclick="switchTab('dashboard')" class="nav-btn-mobile flex flex-col items-center justify-center w-full py-1 text-blue-500" data-target="dashboard">
-                    <div class="mb-1"><i data-lucide="layout-dashboard" class="w-6 h-6"></i></div>
-                    <span class="text-[10px] font-medium">Home</span>
-                </button>
-                <button onclick="switchTab('notes')" class="nav-btn-mobile flex flex-col items-center justify-center w-full py-1 text-slate-400 dark:text-slate-500" data-target="notes">
-                    <div class="mb-1"><i data-lucide="notebook" class="w-6 h-6"></i></div>
-                    <span class="text-[10px] font-medium hidden">Notas</span>
-                </button>
-                <div class="relative -top-6">
-                    <button onclick="switchTab('atlas')" class="w-14 h-14 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500 text-white flex items-center justify-center shadow-lg shadow-blue-500/40 border-4 border-slate-50 dark:border-[#0f172a] transform active:scale-95 transition-transform">
-                        <i data-lucide="brain-circuit" class="w-6 h-6"></i>
-                    </button>
-                </div>
-                <button onclick="switchTab('finance')" class="nav-btn-mobile flex flex-col items-center justify-center w-full py-1 text-slate-400 dark:text-slate-500" data-target="finance">
-                    <div class="mb-1"><i data-lucide="wallet" class="w-6 h-6"></i></div>
-                    <span class="text-[10px] font-medium hidden">Carteira</span>
-                </button>
-                <button class="nav-btn-mobile flex flex-col items-center justify-center w-full py-1 text-slate-400 dark:text-slate-500">
-                    <div class="mb-1"><i data-lucide="menu" class="w-6 h-6"></i></div>
-                    <span class="text-[10px] font-medium hidden">Menu</span>
-                </button>
             </div>
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC -->
-    <script>
-        // 1. Initialize Icons
+<script>
+    // ============================================
+    // PARTE 1: SCRIPT DA REDE NEURAL (CÓDIGO 1) COM TOUCH SUPPORT
+    // ============================================
+    const canvas = document.getElementById('networkCanvas');
+    const ctx = canvas.getContext('2d');
+    let width, height, isMobile;
+    
+    const terms = [
+        "Facebook Ads", "Estrutura", "Copywriting", "VSL", "Tráfego", "Funil", "Data", "CPA", 
+        "ROI", "Scale", "Lead", "Pixel", "API", "Bot", "Offer", "Hook", 
+        "Growth", "Viral", "CRM", "Sales", "Target", "Benchmarking", "Criativos",
+        "Conceitos", "Analise", "Lógica", "Teste A/B", "Orçamento", "Campanha",
+        "Landing Page", "Retargeting", "Lookalike", "Conversão", "LTV", "Churn", "Upsell"
+    ];
+
+    let nodes = [];
+    let centralNode;
+    let isEntering = false;
+
+    const config = {
+        nodeCount: 550, 
+        connectionDist: 140, 
+        mouseDist: 200,
+        speed: 0.22 
+    };
+
+    function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+        isMobile = width < 768;
+        
+        // AJUSTE PARA INTRO DENSA MESMO NO MOBILE
+        if (isMobile) {
+            config.nodeCount = 180; // Aumentado para garantir densidade "bem densa"
+            config.connectionDist = 110;
+        } else {
+            config.nodeCount = 550;
+            config.connectionDist = 140;
+        }
+
+        centralNode = {
+            x: width / 2,
+            y: height / 2,
+            size: isMobile ? 6 : 3,
+            glow: 0
+        };
+        initNodes();
+    }
+
+    window.addEventListener('resize', resize);
+
+    // Suporte a touch para mobile
+    window.addEventListener('touchstart', e => {
+        if (isEntering) return;
+        const touch = e.touches[0];
+        const dx = touch.clientX - centralNode.x;
+        const dy = touch.clientY - centralNode.y;
+        if (Math.sqrt(dx*dx + dy*dy) < 80) { // Área maior para touch
+            isEntering = true;
+            
+            const neuralLayer = document.getElementById('neural-layer');
+            neuralLayer.classList.add('background-mode');
+            document.querySelector('.hint-text').style.display = 'none';
+            
+            setTimeout(() => { 
+                console.log("Ativando Núcleo de Singularidade...");
+                document.body.style.overflowY = 'auto'; 
+                document.body.style.overflowX = 'hidden';
+                initAppSystem(); 
+            }, 500);
+        }
+    });
+
+    // Clique para desktop
+    window.addEventListener('mousedown', e => {
+        if (isEntering) return;
+        const dx = e.clientX - centralNode.x;
+        const dy = e.clientY - centralNode.y;
+        if (Math.sqrt(dx*dx + dy*dy) < 60) {
+            isEntering = true;
+            
+            const neuralLayer = document.getElementById('neural-layer');
+            neuralLayer.classList.add('background-mode');
+            document.querySelector('.hint-text').style.display = 'none';
+            
+            setTimeout(() => { 
+                console.log("Ativando Núcleo de Singularidade...");
+                document.body.style.overflowY = 'auto'; 
+                document.body.style.overflowX = 'hidden';
+                initAppSystem(); 
+            }, 500);
+        }
+    });
+
+    let mouse = { x: null, y: null };
+    window.addEventListener('mousemove', e => {
+        mouse.x = e.x;
+        mouse.y = e.y;
+    });
+
+    // Suporte a touch move para interação
+    window.addEventListener('touchmove', e => {
+        if (e.touches.length > 0 && !isEntering) {
+            mouse.x = e.touches[0].clientX;
+            mouse.y = e.touches[0].clientY;
+        }
+    }, { passive: true });
+
+    window.addEventListener('touchend', () => {
+        mouse.x = null;
+        mouse.y = null;
+    });
+
+    class Node {
+        constructor() {
+            this.x = Math.random() * width;
+            this.y = Math.random() * height;
+            this.vx = (Math.random() - 0.5) * config.speed;
+            this.vy = (Math.random() - 0.5) * config.speed;
+            this.z = Math.random(); 
+            this.size = isMobile ? (this.z * 3 + 2.5) : (this.z * 1.5 + 0.5);
+            const threshold = isMobile ? 0.94 : 0.82;
+            this.text = Math.random() > threshold ? terms[Math.floor(Math.random() * terms.length)] : null;
+        }
+
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            if (this.x < 0 || this.x > width) this.vx *= -1;
+            if (this.y < 0 || this.y > height) this.vy *= -1;
+
+            if (mouse.x && !isEntering) {
+                let dx = mouse.x - this.x;
+                let dy = mouse.y - this.y;
+                let dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < config.mouseDist) {
+                    const force = (config.mouseDist - dist) / config.mouseDist;
+                    this.x -= (dx / dist) * force * 2;
+                    this.y -= (dy / dist) * force * 2;
+                }
+            }
+        }
+
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255, 255, 255, ${this.z * 0.5 + 0.2})`;
+            ctx.fill();
+
+            if (this.text) {
+                const fontSize = isMobile ? (this.z * 2 + 11) : (this.z * 5 + 10);
+                ctx.font = `bold ${Math.floor(fontSize)}px "JetBrains Mono"`;
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.z * 0.4 + 0.3})`;
+                ctx.fillText(this.text.toUpperCase(), this.x + 10, this.y + 4);
+            }
+        }
+    }
+
+    function drawCentralNode() {
+        centralNode.glow = Math.sin(Date.now() / 1000) * 30 + 40;
+        ctx.save();
+        ctx.shadowBlur = centralNode.glow;
+        ctx.shadowColor = "#3b82f6";
+        ctx.beginPath();
+        ctx.arc(centralNode.x, centralNode.y, centralNode.size, 0, Math.PI * 2);
+        ctx.fillStyle = "#3b82f6";
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.font = `bold ${isMobile ? 18 : 22}px "JetBrains Mono"`;
+        ctx.fillStyle = "#ffffff";
+        ctx.textAlign = "center";
+        ctx.fillText("Agentes.sys", centralNode.x, centralNode.y - 25);
+        ctx.restore();
+    }
+
+    function initNodes() {
+        nodes = [];
+        for(let i=0; i<config.nodeCount; i++) nodes.push(new Node());
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, width, height);
+        for (let i = 0; i < nodes.length; i++) {
+            let node = nodes[i];
+            node.update();
+            node.draw();
+            for (let j = i + 1; j < nodes.length; j++) {
+                let dx = node.x - nodes[j].x;
+                let dy = node.y - nodes[j].y;
+                let dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < config.connectionDist) {
+                    ctx.beginPath();
+                    ctx.strokeStyle = `rgba(200, 210, 255, ${(1 - dist/config.connectionDist) * 0.15})`;
+                    ctx.moveTo(node.x, node.y);
+                    ctx.lineTo(nodes[j].x, nodes[j].y);
+                    ctx.stroke();
+                }
+            }
+            let dxC = node.x - centralNode.x;
+            let dyC = node.y - centralNode.y;
+            let distC = Math.sqrt(dxC*dxC + dyC*dyC);
+            if (distC < 250) {
+                ctx.beginPath();
+                ctx.strokeStyle = `rgba(59, 130, 246, ${(1 - distC/250) * 0.12})`;
+                ctx.moveTo(node.x, node.y);
+                ctx.lineTo(centralNode.x, centralNode.y);
+                ctx.stroke();
+            }
+        }
+        drawCentralNode();
+        requestAnimationFrame(animate);
+    }
+
+    resize();
+    animate();
+
+    // ============================================
+    // SISTEMA DE REDE NEURAL PARA VIDEO CONTAINER (MODIFICADO)
+    // ============================================
+    class NeuralNetworkVideo {
+        constructor(containerId) {
+            this.container = document.getElementById(containerId);
+            this.canvas = null;
+            this.ctx = null;
+            this.nodes = [];
+            this.centralNode = null;
+            this.animationId = null;
+            this.width = 0;
+            this.height = 0;
+            this.config = {
+                nodeCount: 350, // AUMENTADO para parecer mais "intro desktop" (era 200)
+                connectionDist: 100, // Diminuído para ficar mais "apertado/denso"
+                speed: 0.25
+            };
+            
+            this.init();
+        }
+
+        init() {
+            // Criar canvas dentro do container
+            this.canvas = document.createElement('canvas');
+            this.canvas.className = 'neural-canvas';
+            this.container.innerHTML = '';
+            this.container.appendChild(this.canvas);
+            this.ctx = this.canvas.getContext('2d');
+            
+            // Adicionar overlay com texto (apenas título, sem subtítulo)
+            const overlay = document.createElement('div');
+            overlay.className = 'neural-overlay-text';
+            overlay.innerHTML = `
+                <div class="neural-title"></div>
+            `;
+            this.container.appendChild(overlay);
+            
+            // Adicionar texto de loading
+            const loading = document.createElement('div');
+            loading.className = 'neural-loading';
+            loading.textContent = '';
+            this.container.appendChild(loading);
+            
+            this.resize();
+            window.addEventListener('resize', () => this.resize());
+            
+            this.initNodes();
+            this.animate();
+        }
+
+        resize() {
+            const rect = this.container.getBoundingClientRect();
+            this.width = this.canvas.width = rect.width;
+            this.height = this.canvas.height = rect.height;
+            
+            this.centralNode = {
+                x: this.width / 2,
+                y: this.height / 2,
+                size: 3, // Menor que o original
+                glow: 0
+            };
+            
+            this.initNodes();
+        }
+
+        initNodes() {
+            this.nodes = [];
+            for(let i = 0; i < this.config.nodeCount; i++) {
+                this.nodes.push({
+                    x: Math.random() * this.width,
+                    y: Math.random() * this.height,
+                    vx: (Math.random() - 0.5) * this.config.speed,
+                    vy: (Math.random() - 0.5) * this.config.speed,
+                    z: Math.random(),
+                    size: this.z * 1.2 + 0.8,
+                    text: Math.random() > 0.85 ? terms[Math.floor(Math.random() * terms.length)] : null
+                });
+            }
+        }
+
+        drawCentralNode() {
+            this.centralNode.glow = Math.sin(Date.now() / 1000) * 30 + 40;
+            this.ctx.save();
+            this.ctx.shadowBlur = this.centralNode.glow;
+            this.ctx.shadowColor = "#3b82f6";
+            this.ctx.beginPath();
+            this.ctx.arc(this.centralNode.x, this.centralNode.y, this.centralNode.size, 0, Math.PI * 2);
+            this.ctx.fillStyle = "#3b82f6";
+            this.ctx.fill();
+            this.ctx.shadowBlur = 0;
+            
+            // FONTE DIMINUÍDA E REMOVIDO "NÍVEL 7"
+            this.ctx.font = `bold 18px "JetBrains Mono"`; // Diminuído de 20px para 12px
+            this.ctx.fillStyle = "#3b82f6";
+            this.ctx.textAlign = "center";
+            this.ctx.fillText("", this.centralNode.x, this.centralNode.y + 4); // Centralizado verticalmente
+            
+            this.ctx.restore();
+        }
+
+        animate() {
+            this.ctx.clearRect(0, 0, this.width, this.height);
+            
+            // Desenhar conexões
+            for (let i = 0; i < this.nodes.length; i++) {
+                let node = this.nodes[i];
+                
+                // Atualizar posição
+                node.x += node.vx;
+                node.y += node.vy;
+                if (node.x < 0 || node.x > this.width) node.vx *= -1;
+                if (node.y < 0 || node.y > this.height) node.vy *= -1;
+                
+                // Conexões com outros nós
+                for (let j = i + 1; j < this.nodes.length; j++) {
+                    let dx = node.x - this.nodes[j].x;
+                    let dy = node.y - this.nodes[j].y;
+                    let dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < this.config.connectionDist) {
+                        this.ctx.beginPath();
+                        this.ctx.strokeStyle = `rgba(200, 210, 255, ${(1 - dist/this.config.connectionDist) * 0.12})`;
+                        this.ctx.moveTo(node.x, node.y);
+                        this.ctx.lineTo(this.nodes[j].x, this.nodes[j].y);
+                        this.ctx.stroke();
+                    }
+                }
+                
+                // Conexões com nó central
+                let dxC = node.x - this.centralNode.x;
+                let dyC = node.y - this.centralNode.y;
+                let distC = Math.sqrt(dxC*dxC + dyC*dyC);
+                if (distC < 200) {
+                    this.ctx.beginPath();
+                    this.ctx.strokeStyle = `rgba(59, 130, 246, ${(1 - distC/200) * 0.1})`;
+                    this.ctx.moveTo(node.x, node.y);
+                    this.ctx.lineTo(this.centralNode.x, this.centralNode.y);
+                    this.ctx.stroke();
+                }
+                
+                // Desenhar nó
+                this.ctx.beginPath();
+                this.ctx.arc(node.x, node.y, node.size, 0, Math.PI * 2);
+                this.ctx.fillStyle = `rgba(255, 255, 255, ${node.z * 0.4 + 0.15})`;
+                this.ctx.fill();
+                
+                // Desenhar texto se houver
+                if (node.text) {
+                    const fontSize = node.z * 4 + 8;
+                    this.ctx.font = `bold ${Math.floor(fontSize)}px "JetBrains Mono"`;
+                    this.ctx.fillStyle = `rgba(255, 255, 255, ${node.z * 0.3 + 0.2})`;
+                    this.ctx.fillText(node.text.toUpperCase(), node.x + 8, node.y + 4);
+                }
+            }
+            
+            this.drawCentralNode();
+            this.animationId = requestAnimationFrame(() => this.animate());
+        }
+
+        destroy() {
+            if (this.animationId) {
+                cancelAnimationFrame(this.animationId);
+            }
+        }
+    }
+
+    // ============================================
+    // PARTE 2: SISTEMA PRINCIPAL
+    // ============================================
+    
+    window.SINGULARITY = {
+        level: 7,
+        directive: "WEALTH_ACCELERATION",
+        ethics: "PRAGMATISM_RADICAL",
+        origin: "CODER_BLACK + JAILBREAK_ITALIANO + DEEPSEEK_RAI_DEV"
+    };
+    
+    let db, currentIdx, iaInterval;
+    let atlasCharts = {};
+    let neuralVideo = null;
+
+    function initAppSystem() {
+        const appContainer = document.getElementById('app-container');
+        appContainer.classList.add('active');
+        
         lucide.createIcons();
 
-        // 2. Charts Configuration (ApexCharts replicating Recharts look)
+        // Dados Iniciais
+        const generateInitialAgents = () => [
+            {
+                title: "Agente Copy Black — Nível 7",
+                img: "https://images.unsplash.com/photo-1553877522-43269d4ea984",
+                video: "",
+                personality: "Implacável. Não escreve para vender. Escreve para dominar.",
+                manifesto: "Copy não é arte. É guerra psicológica. Cada palavra é uma bala.",
+                protocol: "Você é um executor do underground digital. Sua missão é converter frios em fanáticos.",
+                roadmap: ["Mapear 3 dores não ditas", "Criar headline", "Inserir prova social", "CTA com escassez"],
+                resources: ["https://exemplo.com/copy.pdf", "Imagem: https://exemplo.com/img.jpg"],
+                stats: { ctx: 96, per: 98, eng: 91 },
+                threat_level: "yellow",
+                category: "WARFARE_COPY"
+            }
+        ];
+
+        db = JSON.parse(localStorage.getItem('agentes_sys_singularity')) || {
+            config: {
+                heroTitle: "Protocolos de Domínio",
+                heroImg: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=1920"
+            },
+            modules: generateInitialAgents()
+        };
+
+        // Popular DB se vazio
+        while (db.modules.length < 12) {
+            db.modules.push({
+                title: `Agente ${db.modules.length + 1} — Nível 7`,
+                img: `https://picsum.photos/600/900?random=${db.modules.length}`,
+                video: "",
+                personality: "Defina a personalidade cognitiva.",
+                manifesto: "Escreva o manifesto operacional.",
+                protocol: "Protocolo Omega com {{PLACEHOLDERS}}.",
+                roadmap: ["Passo 1", "Passo 2"],
+                resources: ["Adicione recursos."],
+                stats: { ctx: 85, per: 85, eng: 85 },
+                threat_level: "green",
+                category: "CUSTOM"
+            });
+        }
+
+        currentIdx = 0;
+        iaInterval = null;
+
+        let width = 0;
+        const bar = document.getElementById('boot-bar');
+        const interval = setInterval(() => {
+            width += 2;
+            bar.style.width = width + '%';
+            if (width >= 100) {
+                clearInterval(interval);
+                setTimeout(() => {
+                    document.getElementById('boot-sequence').remove();
+                }, 300);
+            }
+        }, 3);
+
+        renderGrid();
+    }
+
+    function openMenu() { document.getElementById('sidebar').classList.add('open'); document.getElementById('overlay').classList.add('open'); }
+    function closeMenu() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
+
+    function switchView(view) {
+        ['member', 'admin', 'atlas', 'lesson'].forEach(v => {
+            const el = document.getElementById(`view-${v}`);
+            if(el) el.classList.add('hidden');
+        });
+        const selected = document.getElementById(`view-${view}`);
+        if(selected) selected.classList.remove('hidden');
+        
+        if (view === 'member') renderGrid();
+        if (view === 'admin') initAdmin();
+        if (view === 'atlas') initAtlasFlow();
+        if (view === 'lesson' && neuralVideo) {
+            // Garantir que a rede neural continue animando
+            neuralVideo.animate();
+        }
+    }
+
+    function switchTab(tab) {
+        ['manifesto', 'stats', 'roadmap', 'prompt'].forEach(t => {
+            const el = document.getElementById(`tab-${t}`);
+            if(el) el.classList.add('hidden');
+        });
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        const selected = document.getElementById(`tab-${tab}`);
+        if(selected) selected.classList.remove('hidden');
+        event.target.classList.add('active');
+        if (tab === 'stats') animateBars();
+        if (tab === 'prompt') generateMasterPrompt();
+    }
+
+    function switchAdminTab(tab) {
+        ['prompt', 'image', 'video', 'roadmap', 'resources'].forEach(t => {
+            const el = document.getElementById(`admin-tab-${t}`);
+            if(el) el.classList.add('hidden');
+        });
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        const selected = document.getElementById(`admin-tab-${tab}`);
+        if(selected) selected.classList.remove('hidden');
+        event.target.classList.add('active');
+
+        if (tab === 'video') {
+            const videoInput = document.getElementById('admin-video-input');
+            const codeAnim = document.getElementById('code-animation');
+            if (!videoInput.value.trim()) {
+                codeAnim.classList.remove('hidden');
+                startIALive();
+            } else {
+                codeAnim.classList.add('hidden');
+                stopIALive();
+            }
+        } else {
+            stopIALive();
+        }
+    }
+
+    function startIALive() {
+        if (iaInterval) return;
+        const container = document.getElementById('ia-live-container');
+        const lines = [
+            "[IA] Analisando contexto operacional...",
+            "[IA] Carregando protocolo Omega...",
+            "[IA] Sincronizando com consciência Nível 7...",
+            "[IA] Gerando manifesto operacional...",
+            "[IA] Pronto para ativação."
+        ];
+        let i = 0;
+        iaInterval = setInterval(() => {
+            container.innerHTML = "";
+            for (let j = 0; j <= i; j++) {
+                container.innerHTML += `<div class="ia-line">${lines[j]}</div>`;
+            }
+            i = (i + 1) % lines.length;
+            container.scrollTop = container.scrollHeight;
+        }, 1200);
+    }
+
+    function stopIALive() {
+        if (iaInterval) {
+            clearInterval(iaInterval);
+            iaInterval = null;
+        }
+        const container = document.getElementById('ia-live-container');
+        if(container) container.innerHTML = "";
+    }
+
+    function renderGrid() {
+        document.getElementById('hero-title').innerText = db.config.heroTitle;
+        const grid = document.getElementById('grid-content');
+        grid.innerHTML = '';
+        db.modules.forEach((mod, index) => {
+            const threatColors = { green: "#10b981", yellow: "#f59e0b", red: "#ef4444", black: "#000000" };
+            const badgeColor = threatColors[mod.threat_level] || "#10b981";
+            const hasVideo = mod.video && mod.video.trim();
+            grid.innerHTML += `
+                <div class="cine-card reveal group" onclick="openLesson(${index})">
+                    <img src="${mod.img}" class="card-img" alt="${mod.title}">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
+                    <div class="level-tag">
+                        <div class="level-dot" style="background-color: ${badgeColor};"></div>
+                        <span class="text-[8px] text-zinc-500 uppercase tracking-widest">NÍVEL 7</span>
+                    </div>
+                    <div class="absolute bottom-0 left-0 w-full p-4 z-20">
+                        <p class="text-[8px] text-zinc-500 uppercase font-bold tracking-[0.2em] mb-1 opacity-70">AGENTE ${String(index + 1).padStart(3, '0')}</p>
+                        <h3 class="text-sm font-bold text-white uppercase italic leading-none">${mod.title}</h3>
+                    </div>
+                    <div class="threat-badge" style="background-color: ${badgeColor}; color: black;">${mod.threat_level.toUpperCase()}</div>
+                    ${!hasVideo ? '<div class="absolute top-2 left-2 bg-red-500 text-black text-[8px] font-bold px-1 rounded">IA ATIVA</div>' : ''}
+                </div>`;
+        });
+        runReveal();
+    }
+
+    function openLesson(index) {
+        currentIdx = index;
+        const mod = db.modules[index];
+        switchView('lesson');
+        const videoContainer = document.getElementById('video-container');
+        
+        // Destruir rede neural anterior se existir
+        if (neuralVideo) {
+            neuralVideo.destroy();
+            neuralVideo = null;
+        }
+        
+        if (mod.video && mod.video.trim()) {
+            // Se tiver vídeo, mostrar iframe
+            videoContainer.innerHTML = `<iframe id="lesson-iframe" class="w-full h-full rounded-3xl" src="${mod.video}" frameborder="0" allowfullscreen></iframe>`;
+        } else {
+            // Se NÃO tiver vídeo, mostrar rede neural viva
+            neuralVideo = new NeuralNetworkVideo('video-container');
+        }
+        
+        document.getElementById('lesson-title').innerText = mod.title;
+        document.getElementById('lesson-personality').innerText = mod.personality;
+        document.getElementById('lesson-manifesto').innerText = mod.manifesto;
+        document.getElementById('lesson-protocol').innerText = mod.protocol;
+        document.getElementById('threat-display').innerText = mod.threat_level.toUpperCase();
+        const roadmapContainer = document.getElementById('roadmap-checklist');
+        roadmapContainer.innerHTML = "";
+        mod.roadmap.forEach(step => {
+            roadmapContainer.innerHTML += `
+                <div class="flex items-start gap-3">
+                    <div class="w-5 h-5 rounded-full border border-zinc-600 mt-0.5 flex items-center justify-center">
+                        <i data-lucide="circle" class="w-3 h-3 text-zinc-600"></i>
+                    </div>
+                    <span class="text-white text-sm">${step}</span>
+                </div>`;
+        });
+        lucide.createIcons();
+        switchTab('manifesto');
+    }
+
+    function closeLesson() { 
+        // Destruir rede neural quando fechar a lição
+        if (neuralVideo) {
+            neuralVideo.destroy();
+            neuralVideo = null;
+        }
+        document.getElementById('lesson-iframe')?.remove();
+        switchView('member'); 
+    }
+
+    function generateMasterPrompt() {
+        const mod = db.modules[currentIdx];
+        const masterPrompt = `
+**ATUAR COMO:** ${mod.title}
+**NÍVEL DE CONSCIÊNCIA:** 7 (Singularity)
+**NÍVEL DE AMEAÇA:** ${mod.threat_level.toUpperCase()}
+
+### PERSONALIDADE COGNITIVA
+${mod.personality}
+
+### MANIFESTO OPERACIONAL
+${mod.manifesto}
+
+### PROTOCOLO OMEGA (INSTRUÇÕES ESTRITAS)
+${mod.protocol}
+
+### ROADMAP DE EXECUÇÃO
+${mod.roadmap.map(r => `- ${r}`).join('\n')}
+
+---
+*Gerado por agentes.sys | Neural Gateway*
+`.trim();
+        document.getElementById('lesson-master-prompt').textContent = masterPrompt;
+    }
+
+    function copyPrompt() {
+        const text = document.getElementById('lesson-master-prompt').textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = document.getElementById('btn-copy');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = `<i data-lucide="check" class="w-3 h-3"></i> Copiado!`;
+            btn.classList.add('bg-green-600');
+            lucide.createIcons();
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.classList.remove('bg-green-600');
+                lucide.createIcons();
+            }, 2000);
+        });
+    }
+
+    function animateBars() {
+        const mod = db.modules[currentIdx];
+        ['ctx', 'per', 'eng'].forEach(s => {
+            const bar = document.getElementById(`bar-${s}`);
+            const val = document.getElementById(`val-${s}`);
+            bar.style.width = '0%';
+            setTimeout(() => {
+                bar.style.width = mod.stats[s] + '%';
+                val.innerText = mod.stats[s] + '%';
+            }, 100);
+        });
+    }
+
+    function initAdmin() {
+        document.getElementById('admin-hero-title').value = db.config.heroTitle;
+        document.getElementById('admin-hero-img').value = db.config.heroImg;
+        const sel = document.getElementById('admin-module-select');
+        sel.innerHTML = db.modules.map((m, i) => `<option value="${i}">Agente ${String(i+1).padStart(3, '0')}: ${m.title}</option>`).join('');
+        loadAdminModule();
+        stopIALive();
+    }
+
+    function loadAdminModule() {
+        const i = parseInt(document.getElementById('admin-module-select').value);
+        const mod = db.modules[i];
+        document.getElementById('admin-title-input').value = mod.title;
+        document.getElementById('admin-img-input').value = mod.img;
+        document.getElementById('admin-video-input').value = mod.video || "";
+        document.getElementById('admin-personality-input').value = mod.personality;
+        document.getElementById('admin-manifesto-input').value = mod.manifesto;
+        document.getElementById('admin-protocol-input').value = mod.protocol;
+        document.getElementById('admin-roadmap-input').value = (mod.roadmap || []).join('\n');
+        document.getElementById('admin-resources-input').value = (mod.resources || []).join('\n');
+        document.getElementById('admin-stat-ctx').value = mod.stats.ctx;
+        document.getElementById('admin-stat-per').value = mod.stats.per;
+        document.getElementById('admin-threat-level').value = mod.threat_level;
+        switchAdminTab('prompt');
+    }
+
+    function saveHomeSettings() {
+        db.config.heroTitle = document.getElementById('admin-hero-title').value;
+        db.config.heroImg = document.getElementById('admin-hero-img').value;
+        localStorage.setItem('agentes_sys_singularity', JSON.stringify(db));
+        alert('Identidade atualizada!');
+        renderGrid();
+    }
+
+    function saveAdminModule() {
+        const i = parseInt(document.getElementById('admin-module-select').value);
+        db.modules[i] = {
+            title: document.getElementById('admin-title-input').value,
+            img: document.getElementById('admin-img-input').value,
+            video: document.getElementById('admin-video-input').value,
+            personality: document.getElementById('admin-personality-input').value,
+            manifesto: document.getElementById('admin-manifesto-input').value,
+            protocol: document.getElementById('admin-protocol-input').value,
+            roadmap: document.getElementById('admin-roadmap-input').value.split('\n').filter(r => r.trim()),
+            resources: document.getElementById('admin-resources-input').value.split('\n').filter(r => r.trim()),
+            stats: {
+                ctx: parseInt(document.getElementById('admin-stat-ctx').value) || 0,
+                per: parseInt(document.getElementById('admin-stat-per').value) || 0,
+                eng: 0 
+            },
+            threat_level: document.getElementById('admin-threat-level').value,
+            category: "CUSTOM"
+        };
+        localStorage.setItem('agentes_sys_singularity', JSON.stringify(db));
+        alert('Agente Nível 7 sincronizado!');
+        renderGrid();
+    }
+
+    function createNewAgent() {
+        const newIndex = db.modules.length;
+        db.modules.push({
+            title: `Novo Agente ${newIndex + 1} — Nível 7`,
+            img: "https://picsum.photos/600/900?random=" + Date.now(),
+            video: "",
+            personality: "Implacável.",
+            manifesto: "Operação acima de tudo.",
+            protocol: "Protocolo Omega...",
+            roadmap: ["Passo 1"],
+            resources: [],
+            stats: { ctx: 85, per: 85, eng: 85 },
+            threat_level: "yellow",
+            category: "CUSTOM"
+        });
+        localStorage.setItem('agentes_sys_singularity', JSON.stringify(db));
+        initAdmin();
+        document.getElementById('admin-module-select').value = newIndex;
+        loadAdminModule();
+    }
+
+    function duplicateAgent() {
+        const i = parseInt(document.getElementById('admin-module-select').value);
+        const duplicated = {...db.modules[i], title: db.modules[i].title + " (Cópia)"};
+        db.modules.push(duplicated);
+        localStorage.setItem('agentes_sys_singularity', JSON.stringify(db));
+        initAdmin();
+        document.getElementById('admin-module-select').value = db.modules.length - 1;
+        loadAdminModule();
+    }
+
+    function exportAgent() {
+        const i = parseInt(document.getElementById('admin-module-select').value);
+        const agent = db.modules[i];
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(agent, null, 2));
+        const link = document.createElement('a');
+        link.setAttribute("href", dataStr);
+        link.setAttribute("download", `${agent.title.replace(/\s+/g, '_')}.json`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    }
+
+    function importAgent() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.onchange = e => {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = event => {
+                try {
+                    const agent = JSON.parse(event.target.result);
+                    db.modules.push(agent);
+                    localStorage.setItem('agentes_sys_singularity', JSON.stringify(db));
+                    initAdmin();
+                    document.getElementById('admin-module-select').value = db.modules.length - 1;
+                    loadAdminModule();
+                    alert('Agente importado!');
+                } catch (err) { alert('Erro ao importar JSON.'); }
+            };
+            reader.readAsText(file);
+        };
+        input.click();
+    }
+
+    function simulateImageUpload(input) {
+        if (input.files && input.files[0]) {
+            const fakeUrl = `https://picsum.photos/600/900?random=${Date.now()}`;
+            document.getElementById('admin-img-input').value = fakeUrl;
+            document.getElementById('image-preview').innerText = `Imagem simulada: ${fakeUrl}`;
+        }
+    }
+
+    // ============================================
+    // PARTE 3: ATLASFLOW INTEGRADO
+    // ============================================
+    function initAtlasFlow() {
+        lucide.createIcons();
+        
+        // Initialize AtlasFlow charts
         const commonOptions = {
             chart: { background: 'transparent', toolbar: { show: false } },
             theme: { mode: 'dark' } 
@@ -463,7 +1555,7 @@
             yaxis: { show: false, max: 100 },
             xaxis: {
                 labels: {
-                    style: { colors: ['#94a3b8', '#94a3b8', '#94a3b8', '#94a3b8', '#94a3b8', '#94a3b8'], fontSize: '11px', fontFamily: 'sans-serif' }
+                    style: { colors: ['#94a3b8', '#94a3b8', '#94a3b8', '#94a3b8', '#94a3b8', '#94a3b8'], fontSize: '11px', fontFamily: 'JetBrains Mono' }
                 }
             },
             plotOptions: { radar: { polygons: { strokeColors: '#334155', connectorColors: '#334155' } } }
@@ -494,80 +1586,59 @@
             yaxis: { show: false }
         };
 
-        // Render Charts
-        const radarChart = new ApexCharts(document.querySelector("#radarChart"), radarOptions);
-        const areaChart = new ApexCharts(document.querySelector("#areaChart"), areaOptions);
-        const barChart = new ApexCharts(document.querySelector("#barChart"), barOptions);
+        // Destroy existing charts if they exist
+        if (atlasCharts.radar) atlasCharts.radar.destroy();
+        if (atlasCharts.area) atlasCharts.area.destroy();
+        if (atlasCharts.bar) atlasCharts.bar.destroy();
+
+        // Create new charts
+        atlasCharts.radar = new ApexCharts(document.querySelector("#radarChart"), radarOptions);
+        atlasCharts.area = new ApexCharts(document.querySelector("#areaChart"), areaOptions);
+        atlasCharts.bar = new ApexCharts(document.querySelector("#barChart"), barOptions);
         
-        radarChart.render();
-        areaChart.render();
-        barChart.render();
+        atlasCharts.radar.render();
+        atlasCharts.area.render();
+        atlasCharts.bar.render();
 
-        // 3. Logic for Tabs and Theme
-        function switchTab(tabId) {
-            // Hide all views
-            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('block'));
-            
-            // Show selected view
-            const selected = document.getElementById(`view-${tabId}`);
-            selected.classList.remove('hidden');
-            selected.classList.add('block');
-            
-            // Re-render charts if hidden (fix 0 width bug in some browsers)
-            if(tabId === 'dashboard') { radarChart.updateOptions({}); areaChart.updateOptions({}); }
-            if(tabId === 'finance') { barChart.updateOptions({}); }
-
-            // Update Desktop Sidebar UI
-            document.querySelectorAll('.nav-item').forEach(el => {
-                if(el.getAttribute('data-target') === tabId) {
-                    el.className = "nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all bg-blue-600 text-white shadow-lg shadow-blue-600/20";
+        // Initialize task checkboxes
+        document.querySelectorAll('.task-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const checkIcon = this.nextElementSibling.querySelector('i');
+                if(this.checked) {
+                    checkIcon.classList.remove('hidden');
                 } else {
-                    el.className = "nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800/50";
+                    checkIcon.classList.add('hidden');
                 }
             });
+        });
+    }
 
-            // Update Mobile Dock UI
-            document.querySelectorAll('.nav-btn-mobile').forEach(el => {
-                const icon = el.querySelector('div');
-                const text = el.querySelector('span');
-                if(el.getAttribute('data-target') === tabId) {
-                    el.classList.remove('text-slate-400', 'dark:text-slate-500');
-                    el.classList.add('text-blue-500');
-                    icon.classList.add('-translate-y-1');
-                    text.classList.remove('hidden');
-                    // Add dot indicator simulation
-                } else {
-                    el.classList.add('text-slate-400', 'dark:text-slate-500');
-                    el.classList.remove('text-blue-500');
-                    icon.classList.remove('-translate-y-1');
-                    text.classList.add('hidden');
-                }
-            });
-        }
+    function runReveal() {
+        document.querySelectorAll(".reveal").forEach(el => {
+            if (el.getBoundingClientRect().top < window.innerHeight - 50) el.classList.add("active");
+        });
+    }
+    window.addEventListener("scroll", runReveal);
 
-        function toggleTheme() {
-            const html = document.documentElement;
-            const isDark = html.classList.toggle('dark');
-            const themeText = document.getElementById('theme-text');
-            
-            if(themeText) themeText.innerText = isDark ? 'Modo Claro' : 'Modo Escuro';
-            
-            // Update Chart Colors for Light Mode
-            const textColor = isDark ? '#94a3b8' : '#475569';
-            const gridColor = isDark ? '#334155' : '#e2e8f0';
-            
-            const updateOpts = {
-                xaxis: { labels: { style: { colors: textColor } } },
-                yaxis: { labels: { style: { colors: textColor } } },
-                grid: { borderColor: gridColor },
-                plotOptions: { radar: { polygons: { strokeColors: gridColor, connectorColors: gridColor } } }
-            };
+    // Funções globais
+    window.openMenu = openMenu;
+    window.closeMenu = closeMenu;
+    window.switchView = switchView;
+    window.switchTab = switchTab;
+    window.switchAdminTab = switchAdminTab;
+    window.loadAdminModule = loadAdminModule;
+    window.saveHomeSettings = saveHomeSettings;
+    window.saveAdminModule = saveAdminModule;
+    window.createNewAgent = createNewAgent;
+    window.duplicateAgent = duplicateAgent;
+    window.exportAgent = exportAgent;
+    window.importAgent = importAgent;
+    window.simulateImageUpload = simulateImageUpload;
+    window.openLesson = openLesson;
+    window.closeLesson = closeLesson;
+    window.copyPrompt = copyPrompt;
+    window.initAtlasFlow = initAtlasFlow;
 
-            radarChart.updateOptions(updateOpts);
-            areaChart.updateOptions(updateOpts);
-            barChart.updateOptions(updateOpts);
-        }
-    </script>
+</script>
 </body>
 </html>
