@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover" />
     <title>agentes.sys | Neural Gateway</title>
     
     <meta name="black-singularity" content="activated">
@@ -14,13 +14,17 @@
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
     <style>
-        /* === ESTILOS GERAIS (Fusão) === */
+        /* === ESTILOS GERAIS (Fusão & Alta Qualidade) === */
         body { 
             background: #0a0a0a; 
             font-family: 'Inter Tight', sans-serif; 
             color: white; 
             margin: 0; 
             overflow: hidden; 
+            /* Fix para fontes mais nítidas em mobile/mac */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
         }
 
         /* === ESTILOS DO CÓDIGO 1 (Neural Layer) === */
@@ -39,7 +43,12 @@
             opacity: 0.6;
         }
 
-        canvas { display: block; }
+        /* Canvas responsivo de alta qualidade */
+        canvas { 
+            display: block; 
+            width: 100%;
+            height: 100%;
+        }
 
         .hint-text {
             position: absolute;
@@ -717,7 +726,7 @@
 
 <script>
     // ============================================
-    // PARTE 1: SCRIPT DA REDE NEURAL (CÓDIGO 1) COM TOUCH SUPPORT
+    // PARTE 1: SCRIPT DA REDE NEURAL (CÓDIGO 1) COM TOUCH SUPPORT E ALTA QUALIDADE
     // ============================================
     const canvas = document.getElementById('networkCanvas');
     const ctx = canvas.getContext('2d');
@@ -743,8 +752,25 @@
     };
 
     function resize() {
-        width = canvas.width = window.innerWidth;
-        height = canvas.height = window.innerHeight;
+        // === FIX DE ALTA QUALIDADE (DPI) ===
+        // Obtém o pixel ratio do dispositivo (1 para desktop normal, 2 ou 3 para retina/mobile)
+        const dpr = window.devicePixelRatio || 1;
+        
+        // Define as dimensões lógicas (CSS)
+        width = window.innerWidth;
+        height = window.innerHeight;
+        
+        // Define as dimensões físicas do Canvas multiplicadas pelo DPR
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        
+        // Força o estilo CSS para o tamanho lógico
+        canvas.style.width = `${width}px`;
+        canvas.style.height = `${height}px`;
+        
+        // Escala o contexto para desenhar usando coordenadas lógicas
+        ctx.scale(dpr, dpr);
+        
         isMobile = width < 768;
         
         // AJUSTE PARA INTRO DENSA MESMO NO MOBILE
@@ -933,7 +959,7 @@
     animate();
 
     // ============================================
-    // SISTEMA DE REDE NEURAL PARA VIDEO CONTAINER (MODIFICADO)
+    // SISTEMA DE REDE NEURAL PARA VIDEO CONTAINER (MODIFICADO - ALTA QUALIDADE)
     // ============================================
     class NeuralNetworkVideo {
         constructor(containerId) {
@@ -946,8 +972,8 @@
             this.width = 0;
             this.height = 0;
             this.config = {
-                nodeCount: 350, // AUMENTADO para parecer mais "intro desktop" (era 200)
-                connectionDist: 100, // Diminuído para ficar mais "apertado/denso"
+                nodeCount: 350, 
+                connectionDist: 100, 
                 speed: 0.25
             };
             
@@ -955,14 +981,12 @@
         }
 
         init() {
-            // Criar canvas dentro do container
             this.canvas = document.createElement('canvas');
             this.canvas.className = 'neural-canvas';
             this.container.innerHTML = '';
             this.container.appendChild(this.canvas);
             this.ctx = this.canvas.getContext('2d');
             
-            // Adicionar overlay com texto (apenas título, sem subtítulo)
             const overlay = document.createElement('div');
             overlay.className = 'neural-overlay-text';
             overlay.innerHTML = `
@@ -970,7 +994,6 @@
             `;
             this.container.appendChild(overlay);
             
-            // Adicionar texto de loading
             const loading = document.createElement('div');
             loading.className = 'neural-loading';
             loading.textContent = '';
@@ -985,13 +1008,27 @@
 
         resize() {
             const rect = this.container.getBoundingClientRect();
-            this.width = this.canvas.width = rect.width;
-            this.height = this.canvas.height = rect.height;
+            
+            // === FIX DE ALTA QUALIDADE (DPI) ===
+            const dpr = window.devicePixelRatio || 1;
+            
+            this.width = rect.width;
+            this.height = rect.height;
+            
+            this.canvas.width = this.width * dpr;
+            this.canvas.height = this.height * dpr;
+            
+            // Força tamanho visual CSS (importante para não "esticar")
+            this.canvas.style.width = `${this.width}px`;
+            this.canvas.style.height = `${this.height}px`;
+            
+            // Escala contexto
+            this.ctx.scale(dpr, dpr);
             
             this.centralNode = {
                 x: this.width / 2,
                 y: this.height / 2,
-                size: 3, // Menor que o original
+                size: 3, 
                 glow: 0
             };
             
@@ -1024,11 +1061,10 @@
             this.ctx.fill();
             this.ctx.shadowBlur = 0;
             
-            // FONTE DIMINUÍDA E REMOVIDO "NÍVEL 7"
-            this.ctx.font = `bold 18px "JetBrains Mono"`; // Diminuído de 20px para 12px
+            this.ctx.font = `bold 18px "JetBrains Mono"`; 
             this.ctx.fillStyle = "#3b82f6";
             this.ctx.textAlign = "center";
-            this.ctx.fillText("", this.centralNode.x, this.centralNode.y + 4); // Centralizado verticalmente
+            this.ctx.fillText("", this.centralNode.x, this.centralNode.y + 4); 
             
             this.ctx.restore();
         }
@@ -1036,17 +1072,14 @@
         animate() {
             this.ctx.clearRect(0, 0, this.width, this.height);
             
-            // Desenhar conexões
             for (let i = 0; i < this.nodes.length; i++) {
                 let node = this.nodes[i];
                 
-                // Atualizar posição
                 node.x += node.vx;
                 node.y += node.vy;
                 if (node.x < 0 || node.x > this.width) node.vx *= -1;
                 if (node.y < 0 || node.y > this.height) node.vy *= -1;
                 
-                // Conexões com outros nós
                 for (let j = i + 1; j < this.nodes.length; j++) {
                     let dx = node.x - this.nodes[j].x;
                     let dy = node.y - this.nodes[j].y;
@@ -1060,7 +1093,6 @@
                     }
                 }
                 
-                // Conexões com nó central
                 let dxC = node.x - this.centralNode.x;
                 let dyC = node.y - this.centralNode.y;
                 let distC = Math.sqrt(dxC*dxC + dyC*dyC);
@@ -1072,13 +1104,11 @@
                     this.ctx.stroke();
                 }
                 
-                // Desenhar nó
                 this.ctx.beginPath();
                 this.ctx.arc(node.x, node.y, node.size, 0, Math.PI * 2);
                 this.ctx.fillStyle = `rgba(255, 255, 255, ${node.z * 0.4 + 0.15})`;
                 this.ctx.fill();
                 
-                // Desenhar texto se houver
                 if (node.text) {
                     const fontSize = node.z * 4 + 8;
                     this.ctx.font = `bold ${Math.floor(fontSize)}px "JetBrains Mono"`;
